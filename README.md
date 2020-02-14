@@ -3,6 +3,31 @@ See it in action [here](https://kevinchiggins.github.io/MoireTest/)!!
 
  UI prototype in JavaScript for manipulating hard-pixel SVG moiré art
 
+As this is an experimental prototype, I'll use a devlog format (with dated entries, most recent first) rather than write documentation as such.
+
+#### 14/02/20
+
+Published on Github
+
+Thinking about my next use case, bezier curves. The thing is, there's a mini-language to be parsed here. K, I'm gonna first of all assume all path elements are a bezier curve with an M absolutely positioned command followed by a q relatively positioned curve definition. I'll draw handles from that and use them to understand how it works. (It might be good to generate identifying text e.g. 'x1 y1' or 'M' for any selected handle, and show it in the control panel).
+
+It'd be good while this thing is small to tighten up the scope, turning globals into parameters etc. Even though I said yesterday I wasn't worried. It's looking good and like I could make some use of it so why not learn how to do it properly?
+
+I wonder could I keep a dynamic menu of dash-arrays... I really would like to get the obviously uncountable complexity under control - say I wanted two lines to have the same... well I could just copy and paste. But I'd like some tools for generating them. Graduated, random, maybe a hi-lo button... work on gaps only and lines only...
+
+Use cases:
+
+4. [DONE!]
+   - add quadratic curve with three control points
+
+Why is the quadratic curve changing its order of displaying, and the lines, but not the circle? Oh no... they're just staying in order.
+
+___
+
+**Some thoughts**
+
+I turned off hard pixels and it didn't look much difference, just smoother, and, let's be honest, easier on the eye. So maybe that needn't be central to the vision. Other possibilities are that I use beefy square pixels to lesson the harsh graininess. I also experimented with zooming in and realised that there are two effects that I thought were moiré: one is the classic shimmering subpatterns and depends on rounding to the pixel, and disappears on zooming out - **but**, other effects like the shimmering hair one still can be seen even when individual lines are well-rendered, and finally **moiré from one object painting over itself** seems to similarly sustain when zoomed in.
+
 ### 13/02/20
 
 Made repository
@@ -77,8 +102,7 @@ Use cases:
    - saving! And some rough loading? (Can use text editor)
 3. [DONE!]
    - two lines ~~with control points at perceived ends~~ (leave the geometry out for now) - edit no. of lines and dash array with sliders in a control panel
-4. 
-   - add quadratic curve with three control points
+   - styling - separated out CSS, defined two panels and made them float
 
 An **edit link** in a **gallery** would be awesome and perhaps it's easily done - opening one o' them blobs, and linking to the JS so the HTML is short enough that I can write it twice (still very inelegant! but it's a demo!)... or maybe I can link to the HTML??
 
