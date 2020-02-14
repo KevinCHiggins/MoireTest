@@ -48,7 +48,7 @@ Non-moiré ideas:
   - lace?!
 - hatching
   - the pen and ink irregular patches (cellular?) technique of alternating hatching angles
-  - generate slight alternating curves to naturalise hatching?
+  - generate slight alternating curves to naturalise hatching? - straight line moiré already can be fairly natural
   - cross hatching
   - cross hatching as a mask to make simple regular dithering patterns
   - hair with masked straight dashed line hatching segments edge matched
@@ -71,14 +71,14 @@ Use cases:
    - two lines (all objects from now on switchable between using button panel).... Okay I'm gonna be real basic about this and not try make an object hierarchy from the very get go. First I need two handles per line. And... for that I need a function that turns coords from events into SVG coords!
    - question: should my arrays hold info about SVG elements, or the elements? The first allows e.g. my handles to display offset; but the second is intrinsically simpler. Note that if I use the offset, I need to be very clear about when it's applied and when not - of course, here sending around the ideal value not the element's real value is nicer. It's just that then "handleX" as an argument is not completely clear which it's referring to.
    - what should be the scope of say handles... ah let's keep it global, this is a rough sketch
-
-2. 
+2. [DONE!]
    - saving! And some rough loading? (Can use text editor)
-3. 
-   - two lines with control points at perceived ends - no. of lines and dash array controlled by sliders in control panel
-
+3. [DONE!]
+   - two lines ~~with control points at perceived ends~~ (leave the geometry out for now) - edit no. of lines and dash array with sliders in a control panel
 4. 
    - add quadratic curve with three control points
+
+An **edit link** in a **gallery** would be awesome and perhaps it's easily done - opening one o' them blobs, and linking to the JS so the HTML is short enough that I can write it twice (still very inelegant! but it's a demo!)... or maybe I can link to the HTML??
 
 **Then I want to switch up and test/study:**
 
