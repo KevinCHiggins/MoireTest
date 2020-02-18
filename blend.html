@@ -31,8 +31,8 @@
 		</div>
 	</main>
 	<script>
-		//document.querySelector('#move-up-button').addEventListener("click", function() {move(1); });
-		//document.querySelector('#move-down-button').addEventListener("click", function() {move(-1); });
+		document.querySelector('#move-up-button').addEventListener("click", function() {move(1); });
+		document.querySelector('#move-down-button').addEventListener("click", function() {move(-1); });
 		document.querySelector('#reset-button').addEventListener("click", switchEl);
 		document.querySelector('#dl-button').addEventListener("click", downloadSvg);
 		document.querySelector('#concealed-dl-link').addEventListener("click", function() { this.style.display = "none"; })
@@ -53,6 +53,32 @@
 		    	setupSvg(this);
 		    }
 		};
+		function move(amount) { //
+			//I'm in class so can't think now, but I think it should be possible to write one process that uses the amount to determine what happens, with no if
+			thisShape = shapes[selectedShape]; // save the selected shape, so we can overwrite the original in the shapes array when moving things around therein
+			if (amount == 1) {
+				if (selectedShape + amount == Shapes.length) { //selected shape is already at the top, and needs to be shoved at the bottom, pushing the rest up
+					
+					for (int i = selectedShape; i > 0; i++) {
+						shapes[i] = shapes[i - 1]; // bring up all other shapes by one in the order
+					}
+					shapes[0] = thisShape; // pop iin the selected shape at the bottom
+					selectedShape = 0; //update the selection so it's at the same shape in its new position
+				}
+				else {
+					shapes[selectedShape] = shaps[selectedShape + 1]; //first part of swap, overwrite selected shape in the array
+					shapes[selectedShape + 1] = thisShape; //then put the saved version of the selected shape
+				}
+			}
+			else if (amount == -1) {
+				if (selectedShape + amount == -1) { //
+					for (int i = shapes.length; i >= 0; i++) {
+						//shapes[i] = shapes[i]
+					}
+
+				}
+			}
+		}
 		xhttp.open("GET", "svg/blend.svg", true);
 		xhttp.send();
 		function setupSvg(xml) {
