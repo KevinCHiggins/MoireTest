@@ -1,9 +1,90 @@
 # MoiréTest
 See it in action [here](https://kevinchiggins.github.io/MoireTest/)!!
 
- UI prototype in JavaScript for manipulating hard-pixel SVG moiré art
+ UI prototype in JavaScript for manipulating hard-pixel (? - see 14/02/20) SVG moiré art
 
-As this is an experimental prototype, I'll use a devlog format (with dated entries, most recent first) rather than write documentation as such.
+As this is an experimental prototype, I'll use a devlog format (with dated entries, most recent first) rather than write documentation as such. And I'll freely bust wild ideas without concern for if/when they get done.
+
+#### 18/02/20
+
+I badly need, in terms of atmosphere and grandiosity, to have shapes going up to the edge of the viewport... two ways of doing this might be:
+
+- to "ghost" handles when they are past the viewport - they go hollow and freeze in place but its actual coords outside the SVG are still registered by the program, i.e. of the mouse over the document, until a mouseup event over the document. The ghost handle represents a way to bring a handle outside the document back into play. Mousedown on it and dragging it outside its own bounds will snap the actual vert's coords back to the handle, within the SVG. This can be avoided by a mouseup *within its own bounds* which will leave the handle ghosted and vert's coords in the outside place. However, this means that ghosted handles are non-living - the vert's position in the outside world can't be modified, only sought again from within the real world.
+- to just use SVG viewport stuff and scroll some way
+
+#### 17/02/20
+
+For lines in particular, a fill canvas or fill frame with hatching/moire would be fairly easily done.
+
+I could get curved hatching by getting JS to "scribble" i.e. make a single path go back on forth on a quadratic curve with the end pixels walking by one or whatever each x... this would need proper path parsing though.
+
+Okay, here's a subtle one. To soften hard-pixel moiré without opacity, make two versions of the border/masking, with one using dashes twice as thick as the other - but with gaps between dashes correspondingly narrowed so the two moiré patterns should align, with one simply consuming more pixels on the same rhythm. Then use these with two close shades for a softer blend!
+
+Okay, I actually spent an hour playing with this, by simply disabling my object selection and hard-coding handles to move all objects (i.e. only works if 3 objectrs with identical coords are loaded). This isn't building for the future, but I did get great visuals from the two-colour (actually I used a 3rd background colour to lessen the harshness) blend! This persuades me (and also looking up data- tags - they're not technically legal yet but will display fine) to go for the multi-element object paradigm. It suits my purposes. 
+
+[Nathalie Lawhead wrote a cool post](http://www.nathalielawhead.com/candybox/the-wonderful-world-of-tools-made-by-small-teams-solo-devs-and-shareware-weird-beautiful-and-experimental-things-to-be-creative-in-an-analysis-on-building-for-approachability) on small, weird software in the space between tool and game, that absolutely resonates with my reasons for working on this project. She brought up some memories such as of a story-making competition with her brother and sister. She says:
+
+- amateurish interfaces can spur creativity
+- similarly, it doesn't have to be serious... both of these come under **approachability**
+- premade material is great
+- there needn't be a *purpose* or *application* for what is made in the software... similarly, software can encourage pride in making stuff that isn't necessarily good
+
+___
+
+Last night in bed I was similarly pondering local, personal, familial, intimate use of images. What about these ways to dis*semina*te pictures:
+
+- Whatsapp stickers, memes, emojis
+- icons (for files, apps, or anything)
+- renderings of dreams, visions, places, perhaps as make-your-own-story/animation/film or adventure game-type **backgrounds** (with gentle, ambiguous, not really Western perspective - Nathalie's article showed some of this) for further collaging
+- logos, tags, devotional text (names of spirits, genres), again for chats, or to illustrate one's surroundings or other output
+- illustrations of personal concepts, neologisms, mottoes, catchphrases memories and associations
+- beadwork, mosaics that make physical the grid nature of moiré... sure, even just printing out some of this stuff big, maybe on vinyl, would have an incredible **material** impact
+
+Use cases:
+
+6. [DONE] multiple downloads per session - just a UI tweak to stop people clicking the same link without regenerating it using the button
+7. change shape order
+8. circle radius
+   - make circle like other objects (fuzzy, no gradient)
+   - type in
+   - drag
+9. pattern from box
+   - type in coords
+   - then drag
+
+#### 16/02/20
+
+Use cases:
+
+5. [DONE!] change shape colour
+
+Some more feature ideas:
+
+- project platonic solids e.g. cube, 4-pyramid, 3-pyramid, cylinder, sphere in orthographic perspective
+  - the idea would be to speed quick composition
+  - it'd go well with lighting, patterns, hatching and fuzzed edges
+  - spin them by 15 degree increments
+  - handles are overlapped, affecting two SVG elements at once to maintain integrity of 3D illusion
+  - clicking on an overlapped handle again changes what shape (which set of other handles) is selected
+- selecting more than one handle - start with CTRL
+- pattern maker - drag over current image - tiles appear around dragged rectangle
+- for a phone, the whole control panel should be foldable, for sure
+
+Got loading SVG from a separate file with an ```XMLHttpRequest```! Although it needs a HTTP server, and also couldn't do it from a different server, so it's not a long-term solution. However for integration with other programs/languages/libraries, it'll be a help.
+
+Speaking of which: Plotly for Python could be a bridge between maths problems and SVG art! All a whiles away. But I was thinking today of making visualisations for solutions, time taken, or stats about solutions, of Project Euler maths problems, in Python. So, a future use case could be, generate some interesting stats, export as a conventional graph (maybe adding a reference in a JSON list so my main page adds it to a gallery), then restyle with masks, moire/dither/hatching patterns and softened edges.
+
+#### 15/02/20
+
+I'm thinking, re the control panel:
+
+- I'm gonna need foldable panels, which shouldn't be too hard
+- **Styled buttons** would add a lot
+
+Was thinking about lighting:
+
+- 16-tone graduated edges is theoretically doable but will basically involve drawing any such shape 16 times, right? I.e. I could piggyback on stroke and use that to widen or narrow any shape, then make a pattern of overdraws... what am I getting over gradients??
+- triangulated normal maps is still the coolest
 
 #### 14/02/20
 

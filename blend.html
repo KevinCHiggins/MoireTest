@@ -14,42 +14,105 @@
 	<main class="main-block">
 		<a id="concealed-dl-link">Download SVG</a> <!--technique from boomcreeper11 on SO-->
 		<div class="panels">
-			<div class="svg-panel">
-				<svg xmlns="http://www.w3.org/2000/svg" id="vector" viewBox="0 0 500 500" height="500" width="500" shape-rendering="geometricPrecision">
-					<defs>
-						<radialGradient id="grad1">
-							<stop offset="0%" style="stop-color:rgb(255,255,255) stop-opacity:1" />
-							<stop offset="100%" style="stop-color:rgb(120,120,160) stop-opacity:1" />
-						</radialGradient>
-					</defs>
-					<circle cx="300" cy="200" r="30" stroke="none" fill="url(#grad1)" />
-					<line stroke="lightblue" stroke-dasharray="1,2,1,2,1,1,1,2" x1="300" y1="300" stroke-width="500" mask="url(#mask1" x2="105" y2="150"></line><line stroke="turquoise" stroke-dasharray="1,2,1,2,1,1,1,2" x1="300" y1="350" stroke-width="500" mask="url(#mask1" x2="205" y2="250"></line>
-					<path d="M 200 300 q 50 50 100 25" stroke="white" stroke-dasharray="1,.1,1,.2" stroke-width="250" fill="none"/>
-				</svg>
+			<div class="svg-panel"><svg></svg>
 			</div>
-  <ellipse cx="200" cy="70" rx="85" ry="55" fill="url(#grad1)" />
 			<div class="control-panel">
-				<h4>Edit selected path</h4><label for="dash-array-field">Stroke dash array</label>
+				<h4>Edit selected shape</h4><label for="dash-array-field">Stroke dash array</label>
 				<input type="text" value="1,1" id="dash-array-field" /><label for="stroke-width-field">Stroke width</label><input type="number" placeholder="1" max="500" min="0" value="40" id="stroke-width-field" />
 				<hr />
 
 				<input type="button" value="Next path" id="reset-button"></input>
 				<input type="button" value="Download" id="dl-button"></input>
+				<input type="button" value="Move up" id="move-up-button"></input>
+				<input type="button" value="Move down" id="move-down-button"></input>
+				<input type="color" value="#ffffff" id="col-button"></input>
 			</div>
 			
 		</div>
 	</main>
 	<script>
+		document.querySelector('#move-up-button').addEventListener("click", function() {move(1); });
+		document.querySelector('#move-down-button').addEventListener("click", function() {move(-1); });
 		document.querySelector('#reset-button').addEventListener("click", switchEl);
 		document.querySelector('#dl-button').addEventListener("click", downloadSvg);
+		document.querySelector('#concealed-dl-link').addEventListener("click", function() { this.style.display = "none"; })
 		document.querySelector('#dash-array-field').addEventListener("input", function() { changeDashArray(this.value) });
 		document.querySelector('#stroke-width-field').addEventListener("change", function() { changeStrokeWidth(this.value) });
-
+		document.querySelector('#col-button').addEventListener("change", function() { changeColour(this.value) });
+		var xhttp = new XMLHttpRequest();
 		var handleSize = 10;
-		var svgObject = document.getElementById('vector');
+
+		var handles = [];
+		var shapes = []; //conceptually inconsistently, this will hold actual line elements (until we generalise to shapes) rather than, as handles does, coords for elements
+		var selectedHandle = -1;
+		var selectedShape = 0; // there'll always be a shapes selected; start with first member of array selected
+		var svgObject;
+		xhttp.onreadystatechange = function() {
+		    if (this.readyState == 4 && this.status == 200) {
+		    	console.log("Going to setup with " + this);
+		    	setupSvg(this);
+		    }
+		};
+		function move(amount) { //
+			//I'm in class so can't think now, but I think it should be possible to write one process that uses the amount to determine what happens, with no if
+			thisShape = shapes[selectedShape]; // save the selected shape, so we can overwrite the original in the shapes array when moving things around therein
+			if (amount == 1) {
+				if (selectedShape + amount == Shapes.length) { //selected shape is already at the top, and needs to be shoved at the bottom, pushing the rest up
+					
+					for (int i = selectedShape; i > 0; i++) {
+						shapes[i] = shapes[i - 1]; // bring up all other shapes by one in the order
+					}
+					shapes[0] = thisShape; // pop iin the selected shape at the bottom
+					selectedShape = 0; //update the selection so it's at the same shape in its new position
+				}
+				else {
+					shapes[selectedShape] = shaps[selectedShape + 1]; //first part of swap, overwrite selected shape in the array
+					shapes[selectedShape + 1] = thisShape; //then put the saved version of the selected shape
+				}
+			}
+			else if (amount == -1) {
+				if (selectedShape + amount == -1) { //
+					for (int i = shapes.length; i >= 0; i++) {
+						//shapes[i] = shapes[i]
+					}
+
+				}
+			}
+		}
+		xhttp.open("GET", "svg/blend.svg", true);
+		xhttp.send();
+		function setupSvg(xml) {
+	    	svgObject = xml.responseXML.firstChild;
+
+			var loadedElements = svgObject.children;
+			console.log(loadedElements);
+			if (loadedElements.length == 0) {
+				console.log("No SVG elements loaded.");
+				window.alert("No SVG elements loaded. Stopping script.")
+				debugger;
+			}
+			var j = 0;
+			for (i = 0; i < loadedElements.length; i++) {
+				if (loadedElements[i].nodeName == 'circle' |loadedElements[i].nodeName == 'rect' | loadedElements[i].nodeName == 'line' | loadedElements[i].nodeName == 'path') {
+					shapes[j] = loadedElements[i];
+					j++;
+				}
+			}
+			svgFrame = document.querySelector(".svg-panel");
+			console.log(svgFrame.firstChild);
+			svgFrame.replaceChild(svgObject, svgFrame.firstChild);
+			document.querySelector("#col-button").value = standardiseColour(shapes[selectedShape].getAttributeNS(null, "stroke"));
+			console.log(shapes.length, 'elements loaded!');
+			setControls();
+			resetHandles(shapes[selectedShape]);
+	    }
+	    
+
+		//var svgObject = document.getElementById('vector');
 		function downloadSvg() {
 			for (i = 0; i < handles.length; i++) {
 				svgObject.removeChild(document.querySelector('#handle' + i));
+				console.log("removed handles");
 			}
 			var svgArray = [];
 			svgText = '<svg xmlns="http://www.w3.org/2000/svg" id="vector" viewBox="0 0 500 500" height="500" width="500" shape-rendering="crispEdges">';
@@ -62,21 +125,26 @@
 			link.download = new Date().toLocaleString() + '.svg';
 			resetHandles(shapes[selectedShape]);
 		}
-		var handles = [];
-		var shapes = []; //conceptually inconsistently, this will hold actual line elements (until we generalise to shapes) rather than, as handles does, coords for elements
-		var selectedHandle = -1;
-		var selectedShape = 0; // there'll always be a shapes selected; start with first member of array selected
+		function standardiseColour(str){ //Thanks to JayB on SO
+		    var ctx = document.createElement("canvas").getContext("2d");
+		    ctx.fillStyle = str;
+		    return ctx.fillStyle;
+		}
 		function switchEl(e) {
 			for (i = 0; i < handles.length; i++) {
 				svgObject.removeChild(document.querySelector('#handle' + i));
 			}
 			if (selectedShape  < shapes.length - 1) { selectedShape++; } else { selectedShape = 0; }
+			document.querySelector("#col-button").value = standardiseColour(shapes[selectedShape].getAttributeNS(null, "stroke"));
 			resetHandles(shapes[selectedShape]);
 			console.log("Shape no.", selectedShape);
 			setControls();
 		}
 		function changeStrokeWidth(val) {
 			shapes[selectedShape].setAttributeNS(null, 'stroke-width', val);
+		}
+		function changeColour(val) {
+			shapes[selectedShape].setAttributeNS(null, 'stroke', val);
 		}
 		function changeDashArray(val) {
 			shapes[selectedShape].setAttributeNS(null, 'stroke-dasharray', val);
@@ -118,7 +186,14 @@
 				handle = document.querySelector('#handle' + selectedHandle);
 				handle.setAttributeNS(null, 'x', newX - handleSize / 2); //this should be a method that handles it in one place
 				handle.setAttributeNS(null, 'y', newY - handleSize / 2);
-				updateShape(shapes[selectedShape], selectedHandle); // on the way to generalising it
+
+				//VERY CRUDE TEST breaking my selection stuff!!!!--------------------------------------------------------------------------------------------------------------
+				updateShape(shapes[0], selectedHandle); // on the way to generalising it
+
+				updateShape(shapes[1], selectedHandle); // on the way to generalising it
+
+				updateShape(shapes[2], selectedHandle); // on the way to generalising it
+				//----------------------------------------------------------------------------------------------------------------
 				redrawHandles(); // so they'll be displayed on top - quick and dirty fix
 			}
 		}
@@ -210,23 +285,7 @@
 			document.querySelector('#stroke-width-field').value = shapes[selectedShape].getAttributeNS(null, 'stroke-width');
 		}
 	
-		var loadedElements = svgObject.children;
-		if (loadedElements.length == 0) {
-			console.log("No SVG elements loaded.");
-			window.alert("No SVG elements loaded. Stopping script.")
-			debugger;
-		}
-		var j = 0;
-		for (i = 0; i < loadedElements.length; i++) {
-			if (loadedElements[i].nodeName == 'circle' |loadedElements[i].nodeName == 'rect' | loadedElements[i].nodeName == 'line' | loadedElements[i].nodeName == 'path') {
-				shapes[j] = loadedElements[i];
-				j++;
-			}
-		}
-		console.log(shapes.length, 'elements loaded!');
-		setControls();
-		resetHandles(shapes[selectedShape]);
-
+		
 	</script>
 		
 </body>
