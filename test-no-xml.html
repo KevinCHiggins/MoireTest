@@ -14,7 +14,7 @@
 	<main class="main-block">
 		<a id="concealed-dl-link">Download SVG</a> <!--technique from boomcreeper11 on SO-->
 		<div class="panels">
-			<div class="svg-panel"><svg></svg>
+			<div class="svg-panel"><svg xmlns="http://www.w3.org/2000/svg" id="vector" viewBox="0 0 500 500" height="500" width="500" shape-rendering="crispEdges"><path d="M 294 194 q -13 70 -110 221" stroke="#55EECC" stroke-width="208" fill="none"></path><path d="M 121 412 q 8 -270 118 -45" stroke="#113322" stroke-dasharray=".5,2,.5,0" stroke-width="255" fill="none"></path><path d="M 447 407 q -122 -334 -132 -407" stroke="#339966" stroke-dasharray="1,1,1,0" stroke-width="303" fill="none"></path><circle cx="200" cy="200" stroke-width="10" stroke="#331177" fill="none" r="50"></circle></svg>
 			</div>
 			<div class="control-panel">
 				<h4>Edit selected shape</h4><label for="dash-array-field">Stroke dash array</label>
@@ -49,12 +49,6 @@
 		var selectedHandle = -1;
 		var selectedShape = 0; // there'll always be a shapes selected; start with first member of array selected
 		var svgObject;
-		xhttp.onreadystatechange = function() {
-		    if (this.readyState == 4 && this.status == 200) {
-		    	console.log("Going to setup with " + this);
-		    	setupSvg(this);
-		    }
-		};
 		function move(amount) {
 			if (amount == 0) return;
 			var newPos = selectedShape + amount;
@@ -82,59 +76,28 @@
 			resetHandles(shapes[selectedShape]);
 
 		}
-		xhttp.open("GET", "svg/iceride.svg", true);
-		xhttp.send();
 		function copySvgAttr(orig, copy, attr) {
 			//console.log(copy, orig, attr);
 			copy.setAttributeNS(null, attr, orig.getAttributeNS(null, attr));
 		}
-		function setupSvg(xml) {
-	    	loadedSVG = xml.responseXML.firstChild;
-
-			var loadedElements = loadedSVG.children;
-			console.log(loadedElements);
+		function setupSvg() {
+			svgFrame = document.querySelector(".svg-panel");
+			svgObject = svgFrame.firstChild;
+			var loadedElements = svgObject.children;
 			if (loadedElements.length == 0) {
 				console.log("No SVG elements loaded.");
 				window.alert("No SVG elements loaded. Stopping script.")
 				debugger;
 			}
 			var j = 0;
-			//Messy-----------------------------------------------
-			console.log("loade length" + loadedElements.length);
 			for (i = 0; i < loadedElements.length; i++) {
 				if (loadedElements[i].nodeName == 'circle' |loadedElements[i].nodeName == 'rect' | loadedElements[i].nodeName == 'line' | loadedElements[i].nodeName == 'path') {
-
-					shapes[j] = loadedElements[i].cloneNode(true);
-					console.log("loaded" + loadedElements[i].nodeName);
+					shapes[j] = loadedElements[i];
 					j++;
 				}
 			}
-			console.log(shapes.length + " shapes loade?");
-			svgFrame = document.querySelector(".svg-panel");
-			console.log(svgFrame.firstChild);
-			svgFrame.removeChild(svgFrame.firstChild);
-			svgObject = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-			copySvgAttr(loadedSVG, svgObject, "id");
-			//copySvgAttr(loadedSVG, svgObject, "xmlns");
-			copySvgAttr(loadedSVG, svgObject, "viewBox");
-			copySvgAttr(loadedSVG, svgObject, "height");
-			copySvgAttr(loadedSVG, svgObject, "width");
-			copySvgAttr(loadedSVG, svgObject, "shape-rendering");
-			//svgFrame.replaceChild(svgObject, svgFrame.firstChild);
-
-			for (i = 0; i < shapes.length; i++) {
-				console.log("i is " + i);
-				
-				svgObject.appendChild(shapes[i])
-				console.log("Element copied to final SVG obj");
-			}
-			document.querySelector("#col-button").value = standardiseColour(shapes[selectedShape].getAttributeNS(null, "stroke"));
-			console.log(shapes.length, 'elements loaded!');
-			//svgObject = 
 			setControls();
 			resetHandles(shapes[selectedShape]);
-
-			svgFrame.appendChild(svgObject);	
 	    }
 	    
 
@@ -335,6 +298,7 @@
 				dragged = false;
 			}
 		}, 10)
+		setupSvg();
 	</script>
 		
 </body>

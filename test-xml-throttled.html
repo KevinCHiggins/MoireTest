@@ -14,7 +14,7 @@
 	<main class="main-block">
 		<a id="concealed-dl-link">Download SVG</a> <!--technique from boomcreeper11 on SO-->
 		<div class="panels">
-			<div class="svg-panel"><svg></svg>
+			<div class="svg-panel"><svg xmlns="http://www.w3.org/2000/svg"></svg>
 			</div>
 			<div class="control-panel">
 				<h4>Edit selected shape</h4><label for="dash-array-field">Stroke dash array</label>
@@ -22,6 +22,8 @@
 				<hr />
 
 				<input type="button" value="Next path" id="reset-button"></input>
+
+				<input type="button" value="Switch shape-rendering" id="render-button"></input>
 				<input type="button" value="Download" id="dl-button"></input>
 				<input type="button" value="Move up" id="move-up-button"></input>
 				<input type="button" value="Move down" id="move-down-button"></input>
@@ -31,6 +33,8 @@
 		</div>
 	</main>
 	<script>
+
+		document.querySelector('#render-button').addEventListener("click", switchRender);
 		document.querySelector('#move-up-button').addEventListener("click", function() {move(1); });
 		document.querySelector('#move-down-button').addEventListener("click", function() {move(-1); });
 		document.querySelector('#reset-button').addEventListener("click", switchEl);
@@ -39,6 +43,7 @@
 		document.querySelector('#dash-array-field').addEventListener("input", function() { changeDashArray(this.value) });
 		document.querySelector('#stroke-width-field').addEventListener("change", function() { changeStrokeWidth(this.value) });
 		document.querySelector('#col-button').addEventListener("change", function() { changeColour(this.value) });
+		var timeLastUpdated = new Date();
 		var dragged = false;
 		var xhttp = new XMLHttpRequest();
 		var handleSize = 10;
@@ -49,6 +54,17 @@
 		var selectedHandle = -1;
 		var selectedShape = 0; // there'll always be a shapes selected; start with first member of array selected
 		var svgObject;
+		function switchRender() {
+			console.log(svgObject.getAttribute("shape-rendering"));
+			if (svgObject.getAttribute("shape-rendering") == "crispEdges") {
+				svgObject.setAttribute("shape-rendering", "geometricPrecision");
+			}
+
+			else if (svgObject.getAttribute("shape-rendering") == "geometricPrecision") {
+				svgObject.setAttribute("shape-rendering", "crispEdges");
+			}
+			console.log(svgObject.getAttribute("shape-rendering"));
+		}
 		xhttp.onreadystatechange = function() {
 		    if (this.readyState == 4 && this.status == 200) {
 		    	console.log("Going to setup with " + this);
@@ -129,12 +145,20 @@
 				console.log("Element copied to final SVG obj");
 			}
 			document.querySelector("#col-button").value = standardiseColour(shapes[selectedShape].getAttributeNS(null, "stroke"));
+
 			console.log(shapes.length, 'elements loaded!');
 			//svgObject = 
 			setControls();
 			resetHandles(shapes[selectedShape]);
 
-			svgFrame.appendChild(svgObject);	
+			svgFrame.appendChild(svgObject);
+			/*	
+			shapes[selectedShape].setAttributeNS(null, 'stroke-dasharray', ".1,.1");
+			shapes[selectedShape].setAttributeNS(null, 'stroke-dasharray', "5,5");
+			shapes[selectedShape].setAttributeNS(null, 'stroke-dasharray', val);
+			shapes[selectedShape].setAttributeNS(null, 'stroke-dasharray', val);
+			shapes[selectedShape].setAttributeNS(null, 'stroke-dasharray', val);
+			*/
 	    }
 	    
 
@@ -209,28 +233,27 @@
 			grabY = e.offsetY - handles[selectedHandle][1];
 			console.log('Graby' + grabX);
 			console.log('Graby' + grabY);
-			console.log((handles[selectedHandle][0]) + ' ' + (handles[selectedHandle][1])); 
+			console.log((handles[selectedHandle][0]) + ' ' + (handles[selectedHandle][1]));
+			timeLastUpdated = new Date();
 		}
 		function drag(e) {
 			if (selectedHandle >= 0) { //drawing the lines is making it hard to mouseup
 				newX = e.offsetX - grabX;
 				newY = e.offsetY - grabY;
-				if (handles[selectedHandle][0] != newX || handles[selectedHandle][1] != newY) {
-					handles[selectedHandle][0] = newX;
-					handles[selectedHandle][1] = newY;
-					console.log((handles[selectedHandle][0]) + ' ' + (handles[selectedHandle][1])); 
-					handle = document.querySelector('#handle' + selectedHandle);
-					handle.setAttributeNS(null, 'x', newX - handleSize / 2); //this should be a method that handles it in one place
-					handle.setAttributeNS(null, 'y', newY - handleSize / 2);
-					timeLastDragged = new Date();
-					console.log(timeLastDragged);
-					redrawHandles(); // so they'll be displayed on top - quick and dirty fix
-					dragged = true;
-				}
-				else {
-					dragged = false;
-				}
+				handles[selectedHandle][0] = newX;
+				handles[selectedHandle][1] = newY;
+				console.log((handles[selectedHandle][0]) + ' ' + (handles[selectedHandle][1])); 
+				handle = document.querySelector('#handle' + selectedHandle);
+				handle.setAttributeNS(null, 'x', newX - handleSize / 2); //this should be a method that handles it in one place
+				handle.setAttributeNS(null, 'y', newY - handleSize / 2);
 
+				
+				if ((new Date() - timeLastUpdated) > 33) {
+					console.log(new Date() - timeLastUpdated);
+					redrawHandles(); // so they'll be displayed on top - quick and dirty fix
+					updateShape(shapes[selectedShape], selectedHandle);
+				}
+				
 			}
 		}
 		function endDragging(e) {
@@ -280,6 +303,7 @@
 			shape.setAttributeNS(null, 'stroke', stroke);
 			//shape.setAttributeNS(null, 'stroke-dasharray', '1,2,1,2,1,1,1,2');
 			//shape.setAttributeNS(null, 'mask', 'url(#mask1'); //overall mask for all shapes
+			timeLastUpdated = new Date();
 			
 
 		}
@@ -327,14 +351,6 @@
 			document.querySelector('#dash-array-field').value = shapes[selectedShape].getAttributeNS(null, 'stroke-dasharray');
 			document.querySelector('#stroke-width-field').value = shapes[selectedShape].getAttributeNS(null, 'stroke-width');
 		}
-		setInterval(function () { //attempting to control performance by limiting redraw rate
-			if (selectedHandle != -1 && dragged == true && new Date() - timeLastDragged > 33) {
-
-				console.log("True");
-				updateShape(shapes[selectedShape], selectedHandle);
-				dragged = false;
-			}
-		}, 10)
 	</script>
 		
 </body>

@@ -5,12 +5,94 @@ See it in action [here](https://kevinchiggins.github.io/MoireTest/)!!
 
 As this is an experimental prototype, I'll use a devlog format (with dated entries, most recent first) rather than write documentation as such. And I'll freely bust wild ideas without concern for if/when they get done.
 
+#### 20/02/20
+
+**Okay I'm stumped.** The slow down has gone away, while I was fluting around changing the dash arrays in the app. This seemed to cause two near-crashes... and then performance was great, the slow down from quadratic curves overlapping themselves totally gone - whatever the dash array (I thought for a sec it might be that non-fractional dash sizes or larger gaps were making the difference, but no - the same dash array I've been having problems with for two days, is now fine).
+
+**Same results on multiple tests... opening a new browser instance starts with a slowdown, changing sizes eliminates it... like it has to warm up??** I think it's **going to very small dashes with big spaces that's the fix**. E.g.,
+
+ .1,3.1,3.
+
+ .1,4.
+
+**Maybe it needs a new dash array each time to force it to recalculate or clear something?**
+
+No, I was thinking it comes down to the actual dash array: .5 at the start seemed bad, 1,1 is always fine (**nope, on restart 1,1 was also slow**)... but now this (orig, slow value) is fine too: .5,2,.5,0.
+
+**Three changes of dash array?** No, seems not enough. Three unseen dash-arrays?
+
+**It seems to have to freeze for a good few seconds on a change of dash-array, two or three times, and then it's there.** This suggests that I can finish packaging this app by simply keeping Slimjet open in the faster state - but that there's no point developing
+
+#### 19/02/20
+
+Okay, this is in the wrapping up stages but this morning I want to be sure of the context of that pesky slow down. So I'll make four versions:
+
+- [DONE] test-no-xml.html -  similar to no-xml.html, i.e. that reads the SVG shapes from the .html file, but uses any extra functionality I've implemented since I saved no-xml.html i.e. changing shape order
+- [DONE] test-xml-pegged.html - one similar to blend.html, i.e. loading with an XML request and then pegging the updateShape rate to a setInterval
+- [DONE] test-xml-basic.html - one that loads from an XML request with no attempt to mitigate slow down
+- [DONE] test-orig-no-xml - find out why the older no-xml.html is way faster!? by making a copy and tweaking it
+
+I'll stay alert to the possibility that some other change (not the loading by XML GET request) caused the slow down, i.e. if no-xml.html is still faster than test-no-xml.html - perhaps even something within the SVG data itself!
+
+**Okay**, test-no-xml.html is no faster. Next I'll try put the same SVG data into a copy of no-xml.html (which seems fast still).
+
+**Okay**, I've found the, or a culprit! **Auto** or **geometricPrecision** shape-rendering modes are **way faster** in (my Chrome browser clone) Slimjet, than **crispEdges** or, mysteriously, **optimizeSpeed**! This doesn't quite tally with my memories of making sunsets and stuff 2/3 days ago (should've committed that version, of course) using crispEdges, but maybe my memory is skating over a slow down that was there.
+
+In any case, this suggests a hack - switch shape-rendering mode while dragging! [DONE] Nope, no joy, still feels rough.
+
+Okay, again, best pause on this. What I learned today:
+
+- how to use about:tracing to see individual frames - here I can see that RasterDecoderImpl::DoEndRasterCHROMIUM::flush is taking up to 500ms to complete, and that's in the GPU, and that the latency is from that
+- how to use the performance tab of devtools to see individual frames (which indicates that rasterising is the problem)
+- that crispEdges seems to be poorly optimised in Slimjet. This kind of weakens the whole premise of this project... my idea of subverting how SVG is meant to be used will inevitably come up against weaker parts of browser implementations. When I consider how the interface didn't even work in Firefox... I'm avoidably putting myself into trouble with this project brief.
+
+___
+
+Minimal design for masking:
+
+...
+
+___
+
+Minimal design for multi-objects:
+
+- blend only (overlay three versions of the same object: a background - no dashes, blend - thick dashes, and foreground - thin dashes)
+- no more than 10 (and actually 3) shapes per, and ten in total, for simplicity of storing info in id, "multi0shape2"
+- okay, a crude approach: hold only the shape0 in the shapes array; calls to updateShape, though, and anywhere else needed, check id and look up a 2D array, restOfMultis, and get shapes 1-9 from there and manipulate them... 
+
 #### 18/02/20
+
+Use cases:
+
+7. [DONE] change shape order
 
 I badly need, in terms of atmosphere and grandiosity, to have shapes going up to the edge of the viewport... two ways of doing this might be:
 
 - to "ghost" handles when they are past the viewport - they go hollow and freeze in place but its actual coords outside the SVG are still registered by the program, i.e. of the mouse over the document, until a mouseup event over the document. The ghost handle represents a way to bring a handle outside the document back into play. Mousedown on it and dragging it outside its own bounds will snap the actual vert's coords back to the handle, within the SVG. This can be avoided by a mouseup *within its own bounds* which will leave the handle ghosted and vert's coords in the outside place. However, this means that ghosted handles are non-living - the vert's position in the outside world can't be modified, only sought again from within the real world.
 - to just use SVG viewport stuff and scroll some way
+
+Having problems with major slowing down and I suspect it's due to having loaded the SVG using an XmlHttpRequest.
+
+Turns out no. I guess I just didn't notice this slowdown previously. Unfortunately, it happens when there's lots of complex overdraw which is of course when the moiré gets interesting.
+
+___
+
+**All right, it's decided.** This prototype has served its purpose and the rough and ready nature of it would impede further work. The main discovery is that, **yes** these effects look great, and **no** they don't perform well enough (well the ones from curves) to be stackable in an interactive editor. Therefore I'll package up what I have so far and leave the tons of ideas for future exploration, quite possibly from different approaches e.g. generative, visualisation, or transformation of input data.
+
+I'll wrap it up this week.
+
+**Essentials**
+
+- circular and rectangular masking to make tight, framed-feeling graphics
+- adding and removing shapes (lines and simple quadratic curves)
+- a gallery for this readme file
+
+**Optional**
+
+- filled circles and rectangles as shapes
+- some kind of transform, viewport shift or move all or move whole shape option
+- multishapes - even just the "blended" quadratic curve
+- a gallery page with "Edit me" option for each
 
 #### 17/02/20
 
@@ -43,14 +125,6 @@ Last night in bed I was similarly pondering local, personal, familial, intimate 
 Use cases:
 
 6. [DONE] multiple downloads per session - just a UI tweak to stop people clicking the same link without regenerating it using the button
-7. change shape order
-8. circle radius
-   - make circle like other objects (fuzzy, no gradient)
-   - type in
-   - drag
-9. pattern from box
-   - type in coords
-   - then drag
 
 #### 16/02/20
 
