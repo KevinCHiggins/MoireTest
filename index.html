@@ -12,7 +12,6 @@
 		<h3>by Kevin Higgins</h3>
 	</header>
 	<main class="main-block">
-		<a id="concealed-dl-link">Download SVG</a> <!--technique from boomcreeper11 on SO-->
 		<div class="panels">
 			<div class="svg-panel"><svg xmlns="http://www.w3.org/2000/svg"></svg>
 			</div>
@@ -21,13 +20,23 @@
 				<input type="text" value="1,1" id="dash-array-field" /><label for="stroke-width-field">Stroke width</label><input type="number" placeholder="1" max="500" min="0" value="40" id="stroke-width-field" />
 				<hr />
 
-				<input type="button" value="Next path" id="reset-button"></input>
+				<input class="moire-button" type="button" value="Next path" id="reset-button" />
 
-				<input type="button" value="Switch shape-rendering" id="render-button"></input>
-				<input type="button" value="Download" id="dl-button"></input>
-				<input type="button" value="Move up" id="move-up-button"></input>
-				<input type="button" value="Move down" id="move-down-button"></input>
-				<input type="color" value="#ffffff" id="col-button"></input>
+				<input class="moire-button" type="button" value="Switch shape-rendering" id="render-button" />
+				<input class="moire-button" type="button" value="Download" id="dl-button" />
+				<input class="moire-button" type="button" value="Move up" id="move-up-button" />
+				<input class="moire-button" type="button" value="Move down" id="move-down-button" />
+				<label for="masked-button">Masked</label>
+				<input class="moire-radio-button" type="radio" name="mask-options" value="masked" id="masked-button" />
+				<label for="unmasked-button">Unmasked</label>
+
+				<input class="moire-radio-button" type="radio" name="mask-options" value="unmasked"id="unmasked-button" />
+				<label for="sent-to-mask-button">Sent to mask</label>
+				<input class="moire-radio-button" type="radio" name="mask-options" value="sent" id="sent-to-mask-button" />
+
+				<input type="color" value="#ffffff" id="col-button" />
+
+				<a id="concealed-dl-link">Download SVG</a> <!--technique from boomcreeper11 on SO-->
 			</div>
 			
 		</div>
@@ -37,6 +46,9 @@
 		document.querySelector('#render-button').addEventListener("click", switchRender);
 		document.querySelector('#move-up-button').addEventListener("click", function() {move(1); });
 		document.querySelector('#move-down-button').addEventListener("click", function() {move(-1); });
+		document.querySelector('#masked-button').addEventListener("click", function() {masking(this.value)});
+		document.querySelector('#unmasked-button').addEventListener("click", function() {masking(this.value)});
+		document.querySelector('#sent-to-mask-button').addEventListener("click", function() {masking(this.value)})
 		document.querySelector('#reset-button').addEventListener("click", switchEl);
 		document.querySelector('#dl-button').addEventListener("click", downloadSvg);
 		document.querySelector('#concealed-dl-link').addEventListener("click", function() { this.style.display = "none"; })
@@ -49,10 +61,37 @@
 		var dragUpdates = 0;
 		var handles = [];
 		var timeLastDragged= new Date();
-		var shapes = []; //conceptually inconsistently, this will hold actual line elements (until we generalise to shapes) rather than, as handles does, coords for elements
+		var shapes = [];
+		var shapeMasking = []; //2D array, 2 members in each subarray: a boolean masked (false means part of mask) and a string, which for now is always = MASK_NAME; empty string, unmasked
+		const MASK_NAME = "mask1";
 		var selectedHandle = -1;
 		var selectedShape = 0; // there'll always be a shapes selected; start with first member of array selected
 		var svgObject;
+		function masking(value) {
+			let maskingOptions = [];
+			if (value == "sent") {
+				maskingOptions[0] = false;
+				maskingOptions[1] = MASK_NAME;
+				svgObject.removeChild(shapes[selectedShape]);
+				let mask = document.getElementById("mask1"); //assuming it's there, but we put it in during loading
+				if (mask.children.length > 0) {
+					console.log("Mask has multiple members now"); // FIXME deal with order____________________________________________
+				}
+				mask.appendChild(shapes[selectedShape]);
+			}
+			else if (value == "masked") { // FIXME ______________________________________
+				maskingOptions[0] = true; //it's gonna be masked by...
+				maskingOptions[1] = MASK_NAME;
+				
+			}
+			else {//make this a default case too just in case of weird input, but it should be "unmasked" _______________________________
+				maskingOptions[0] = false;
+				maskingOptions[1] = "";
+			}
+
+			shapeMasking[selectedShape] = maskingOptions;
+			console.log(shapeMasking[selectedShape]);
+		}
 		function switchRender() {
 			console.log(svgObject.getAttribute("shape-rendering"));
 			if (svgObject.getAttribute("shape-rendering") == "crispEdges") {
@@ -117,9 +156,13 @@
 			//Messy-----------------------------------------------
 			console.log("loade length" + loadedElements.length);
 			for (i = 0; i < loadedElements.length; i++) {
-				if (loadedElements[i].nodeName == 'circle' |loadedElements[i].nodeName == 'rect' | loadedElements[i].nodeName == 'line' | loadedElements[i].nodeName == 'path') {
+				if (loadedElements[i].nodeName == 'defs' | loadedElements[i].nodeName == 'circle' |loadedElements[i].nodeName == 'rect' | loadedElements[i].nodeName == 'line' | loadedElements[i].nodeName == 'path') {
 
 					shapes[j] = loadedElements[i].cloneNode(true);
+					let maskingOptions = [];
+					maskingOptions[0] = false;
+					maskingOptions[1] = "";
+					shapeMasking[j] = maskingOptions;
 					console.log("loaded" + loadedElements[i].nodeName);
 					j++;
 				}
@@ -135,14 +178,26 @@
 			copySvgAttr(loadedSVG, svgObject, "height");
 			copySvgAttr(loadedSVG, svgObject, "width");
 			copySvgAttr(loadedSVG, svgObject, "shape-rendering");
+			if (!document.querySelector("" + MASK_NAME)) {
+				console.log("ADDING MASK");
+				//defs go before shapes... of course, this is not compatible with any 
+				definitions = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+				mask = document.createElementNS("http://www.w3.org/2000/svg", "mask");
+				mask.setAttributeNS(null, "id", MASK_NAME);
+				definitions.appendChild(mask);	
+				svgObject.appendChild(definitions);
+			}
+
 			//svgFrame.replaceChild(svgObject, svgFrame.firstChild);
 
 			for (i = 0; i < shapes.length; i++) {
 				console.log("i is " + i);
 				
 				svgObject.appendChild(shapes[i])
+
 				console.log("Element copied to final SVG obj");
 			}
+
 			document.querySelector("#col-button").value = standardiseColour(shapes[selectedShape].getAttributeNS(null, "stroke"));
 			console.log(shapes.length, 'elements loaded!');
 			//svgObject = 
@@ -289,6 +344,7 @@
 			shape.setAttributeNS(null, 'stroke', stroke);
 			//shape.setAttributeNS(null, 'stroke-dasharray', '1,2,1,2,1,1,1,2');
 			//shape.setAttributeNS(null, 'mask', 'url(#mask1'); //overall mask for all shapes
+
 			
 
 		}
@@ -335,6 +391,20 @@
 			console.log("Switching vals");
 			document.querySelector('#dash-array-field').value = shapes[selectedShape].getAttributeNS(null, 'stroke-dasharray');
 			document.querySelector('#stroke-width-field').value = shapes[selectedShape].getAttributeNS(null, 'stroke-width');
+			if (shapeMasking[selectedShape][0] == true) {
+				document.getElementById("masked-button").checked = true;
+			}
+			else {
+				if (shapeMasking[selectedShape][1] != "") {
+					document.getElementById("sent-to-mask-button-button").checked = true;
+				}
+				else {
+					document.getElementById("unmasked-button").checked = true;
+				}
+				
+
+			}
+
 		}
 	</script>
 		

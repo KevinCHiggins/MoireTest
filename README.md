@@ -15,13 +15,23 @@ As this is an experimental prototype, I'll use a devlog format (with dated entri
 
  .1,4.
 
-**Maybe it needs a new dash array each time to force it to recalculate or clear something?**
+Maybe it needs a new dash array each time to force it to recalculate or clear something?
 
 No, I was thinking it comes down to the actual dash array: .5 at the start seemed bad, 1,1 is always fine (**nope, on restart 1,1 was also slow**)... but now this (orig, slow value) is fine too: .5,2,.5,0.
 
 **Three changes of dash array?** No, seems not enough. Three unseen dash-arrays?
 
-**It seems to have to freeze for a good few seconds on a change of dash-array, two or three times, and then it's there.** This suggests that I can finish packaging this app by simply keeping Slimjet open in the faster state - but that there's no point developing
+**It seems to have to freeze for a good few seconds on a change of dash-array, two or three times, and then it's fast.** This suggests that I can finish packaging this app by simply keeping Slimjet open in the faster state - but that there's no point developing it as a tool to release unless I unlock the mystery.
+
+___
+
+Minimal design for masking:
+
+- [DONE] all shapes have three radio buttons: sent to mask; masked; unmasked
+- [DONE] hapes with sent to mask, are not appended with the rest, but inside a mask, "moire-mask" - in the same order as they are in the shapes array, where they stay
+- [DONE] a shapesMasking array with arrays of boolean flags (sent/not sent; masked/unmasked (only valid if not sent)) is kept
+- order of shapes in mask is taken from original order
+- shapes can be taken back out of masks and reappear with order intact
 
 #### 19/02/20
 
@@ -48,17 +58,12 @@ Okay, again, best pause on this. What I learned today:
 
 ___
 
-Minimal design for masking:
-
-...
-
-___
-
 Minimal design for multi-objects:
 
 - blend only (overlay three versions of the same object: a background - no dashes, blend - thick dashes, and foreground - thin dashes)
 - no more than 10 (and actually 3) shapes per, and ten in total, for simplicity of storing info in id, "multi0shape2"
-- okay, a crude approach: hold only the shape0 in the shapes array; calls to updateShape, though, and anywhere else needed, check id and look up a 2D array, restOfMultis, and get shapes 1-9 from there and manipulate them... 
+- [NO]okay, a crude approach: hold only the shape0 in the shapes array; calls to updateShape, though, and anywhere else needed, check id and look up a 2D array, restOfMultis, and get shapes 1-9 from there and manipulate them... 
+- 2nd version (because shapes need to be editable separately (stroke, etc.)): a menu "add to multishape": with options path0 or rect0 (dynamically set according to what shape is currently selected). When a shape is selected of the same type as a multishape, there are two options e.g. circle0 and circle1 (circle1 meaning create a new one). If added to a non-new multishape, a shape takes the coordinates of the already-present members. A shape can be removed from a multishape with a button that replaces the menu once it's part of one. Editing the handles of any shape in a multishape updates the coords of all.
 
 #### 18/02/20
 

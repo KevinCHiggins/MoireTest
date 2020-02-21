@@ -2,6 +2,10 @@ body {
 	font-family: 'Aleo', serif;
 	box-sizing: border-box;
 }
+.moire-button {
+	font-family: 'Aleo', serif;
+	font-size: 1em;
+}
 
 #concealed-dl-link {
 	display: none;
@@ -23,6 +27,16 @@ input {
 	margin: 4px;
 	display: block;
 }
+
+.moire-radio-button {
+	display: inline;
+}
+
+label {
+	font-size: 1em;
+	
+	padding: 4px;
+}
 #circle {
 	filter: brightness(0.5) sepia(1) hue-rotate(-70deg) saturate(5);
 }
@@ -34,7 +48,7 @@ input {
 }
 .control-panel {
 	max-width: 500px;
-	min-width:500px;
+	min-width:300px;
 	float: left;
 	border: thin solid grey;
 }
