@@ -7,15 +7,45 @@ As this is an experimental prototype, I'll use a devlog format (with dated entri
 
 #### 23/02/20
 
-Bug hunting. Realised that the **bad variable name** selectedShape I called out a few days ago was leading to mistakes again... in future I will rename instantly if I notice such. Now it's selectedShapeId.
+Bug hunting. Realised that the **bad variable name** selectedShape I called out a few days ago was leading to mistakes again and I've probably cumulatively lost an hour due to it... in future I will rename instantly if I notice such. Now it's selectedShapeId.
+
+Ah yeah - another bug... my insertion for new shapes assumes that the shape that ends up just above the new shape *in the array* will be in svgObject - whereas of course it's just as likely in the mask. What I need to do is traverse back up the array from there looking for the first shape which is in svgObject (i.e. whose masking is set to false, "" or true, "mask1") and upon failing append to svgObject (then redrawHandles).
+
+Obviously, my crude design is getting strained.
+
+Tidied up the UI a fair bit today, just layout mostly
+
+[FIXED, forgot to use getAttribute**NS**] Bug: setting colour of unfilled rect changes it to filled (w/o changing checkbox)
+
+[FIXED] Bug: adding a shape cause the shape above it to be dropped from the rotation, plus it's not going in after the selected shape!!
+
+Ugh, having the separate shapesMasking array is such poor design! Actually, it wouldn't be hard to merge them and maybe that should be done before making multi-shapes.
 
 Remaining use cases:
 
-9. Filled rects and circles
-10. Adding and removing shapes
-11. Multi-object/blend, say just for curves - it's a tasty effect!
+9. [DONE]Adding and removing shapes			
+   - [DONE]first on top
+   - [DONE]add rects, circles, curves
+   - [DONE] a way of changing circle radius (rough - just a number field that's otherwise disabled)
+   - [DONE] insert just above current selection
+   - [DONE] remove shape
+10. [DONE] Fill checkbox
+    - need to sort it so all shapes have a stroke of the same colour (a handy but I think appropriate simplification)
+11. [DONE] Get workaround into save-load!! And tidied it up a micron
+12. [DONE] Get masking into save-load!! Heheh, I have to extract shapes from the mask... now, they will lose their order in the original session but that's fine - overall order is just a way of dealing with things within the app - so, I'll simply put them on top of the array
+13. Working rect!
+14. Multi-object/blend, say just for curves - it's a tasty effect!
+15. UI nice to haves
+    - disable edits when all deleted
+    - a preview button to hide handles (maybe piggyback on previous!)
+    - use hatching and moire made in the app, as backgrounds for hip UI elements? 
+    - make a grid layout or some such
 
 Then I want to make a gallery (prob with screenshots) for this readme, and I'm done! Time to write a blog post about it.
+
+___
+
+I think I need to stop for the night. Still, a serious day's work! Even if a lot of it is coming up against the limits of the design. I'm nearly done with my goal of a prototype moiré art tool that exports framed-looking, re-editable pieces!
 
 #### 22/02/20
 
@@ -33,7 +63,7 @@ Anyhow, fixed a bunch of bugs and unfinished stuff with the masking: keeping tra
 
 selectedShape is a bad variable name, confusable with the shape local variable I legitimately make here and there. Should be selectedShapeId.
 
-Gotta head out to the pub now, but I have a BUG: moving the shape up (in order) while it's in the mask, removes the defs clause altogether.
+[FIXED]Gotta head out to the pub now, but I have a BUG: moving the shape up (in order) while it's in the mask, removes the defs clause altogether.
 
 #### 20/02/20
 
@@ -106,7 +136,7 @@ I badly need, in terms of atmosphere and grandiosity, to have shapes going up to
 - to "ghost" handles when they are past the viewport - they go hollow and freeze in place but its actual coords outside the SVG are still registered by the program, i.e. of the mouse over the document, until a mouseup event over the document. The ghost handle represents a way to bring a handle outside the document back into play. Mousedown on it and dragging it outside its own bounds will snap the actual vert's coords back to the handle, within the SVG. This can be avoided by a mouseup *within its own bounds* which will leave the handle ghosted and vert's coords in the outside place. However, this means that ghosted handles are non-living - the vert's position in the outside world can't be modified, only sought again from within the real world.
 - to just use SVG viewport stuff and scroll some way
 
-Having problems with major slowing down and I suspect it's due to having loaded the SVG using an XmlHttpRequest.
+Having problems with **major slowing down** and I suspect it's due to having loaded the SVG using an XmlHttpRequest.
 
 Turns out no. I guess I just didn't notice this slowdown previously. Unfortunately, it happens when there's lots of complex overdraw which is of course when the moiré gets interesting.
 
@@ -249,7 +279,7 @@ Moiré ideas:
 Non-moiré ideas:
 
 - banded shading:
-  - normal-mapped triangles (from triangulating point heightmap) - **this is fresh**
+  - triangles lit using their normals (from triangulating a point heightmap) - **this is fresh**
     - generate more triangles and/or use blurring to soften edges, crispen peaks, roughen/break edges, like classic game textures
   - crystal facets/lantern glass/leaded glass
   - gouraud shading (from 3D mesh of some kind, or drawn)
