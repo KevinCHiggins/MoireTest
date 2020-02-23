@@ -5,6 +5,36 @@ See it in action [here](https://kevinchiggins.github.io/MoireTest/)!!
 
 As this is an experimental prototype, I'll use a devlog format (with dated entries, most recent first) rather than write documentation as such. And I'll freely bust wild ideas without concern for if/when they get done.
 
+#### 23/02/20
+
+Bug hunting. Realised that the **bad variable name** selectedShape I called out a few days ago was leading to mistakes again... in future I will rename instantly if I notice such. Now it's selectedShapeId.
+
+Remaining use cases:
+
+9. Filled rects and circles
+10. Adding and removing shapes
+11. Multi-object/blend, say just for curves - it's a tasty effect!
+
+Then I want to make a gallery (prob with screenshots) for this readme, and I'm done! Time to write a blog post about it.
+
+#### 22/02/20
+
+8. [DONE] Finally got masking done!
+
+**Aaand,** I found *another* thing that kind of sinks the project. First and most obviously, the browser compatibility of the moire I'm getting in Slimjet/Chrome is non-existent - I just checked (no crisp edges in Edge or IE, and a quite different look in Firefox). Second, my original idea was "masked moiré", very much using masking to cut out nice chunks of moiré. However, I can't do this with paths (curves) because Slimjet/Chrome crudely clips them without regard for stroke-width when it masks them, presumably as an optimisation. Leaving me with big unwanted gaps cut into my moiré which depends on very wide dashed strokes.
+
+I found a workaround for Slimjet/Chrome: add invisible commands to the path with coordinates at the corners of the canvas - this prompts the browser not to clip inside those bounds. But it's obviously a dodgy workaround and not proper SVG output anymore (even if it displays okay as is).
+
+[DONE, quite successfully although it won't work for circles and rects with wide strokes - but they have no use anyway!] I'll try use this workaround to get a few nice images and call it a day.
+
+Anyhow, fixed a bunch of bugs and unfinished stuff with the masking: keeping track of masking and position correctly as shapes switch between unmasked, masked and sent to mask.
+
+#### 21/02/20
+
+selectedShape is a bad variable name, confusable with the shape local variable I legitimately make here and there. Should be selectedShapeId.
+
+Gotta head out to the pub now, but I have a BUG: moving the shape up (in order) while it's in the mask, removes the defs clause altogether.
+
 #### 20/02/20
 
 **Okay I'm stumped.** The slow down has gone away, while I was fluting around changing the dash arrays in the app. This seemed to cause two near-crashes... and then performance was great, the slow down from quadratic curves overlapping themselves totally gone - whatever the dash array (I thought for a sec it might be that non-fractional dash sizes or larger gaps were making the difference, but no - the same dash array I've been having problems with for two days, is now fine).
@@ -30,8 +60,8 @@ Minimal design for masking:
 - [DONE] all shapes have three radio buttons: sent to mask; masked; unmasked
 - [DONE] hapes with sent to mask, are not appended with the rest, but inside a mask, "moire-mask" - in the same order as they are in the shapes array, where they stay
 - [DONE] a shapesMasking array with arrays of boolean flags (sent/not sent; masked/unmasked (only valid if not sent)) is kept
-- order of shapes in mask is taken from original order
-- shapes can be taken back out of masks and reappear with order intact
+- [DONE] order of shapes in mask is taken from original order
+- [DONE] shapes can be taken back out of masks and reappear with order intact
 
 #### 19/02/20
 

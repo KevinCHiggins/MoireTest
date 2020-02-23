@@ -35,8 +35,6 @@
 				<input class="moire-radio-button" type="radio" name="mask-options" value="sent" id="sent-to-mask-button" />
 
 				<input type="color" value="#ffffff" id="col-button" />
-				<input class="moire-button" type="button" value="Add shape" id="add-shape-button" />
-				<select id="add-shape-menu" value=" "><option>Hatching</option></select>
 
 				<a id="concealed-dl-link">Download SVG</a> <!--technique from boomcreeper11 on SO-->
 			</div>
@@ -45,19 +43,18 @@
 	</main>
 	<script>
 
-		document.querySelector("#render-button").addEventListener("click", switchRender);
-		document.querySelector("#move-up-button").addEventListener("click", function() {move(1); });
-		document.querySelector("#move-down-button").addEventListener("click", function() {move(-1); });
-		document.querySelector("#masked-button").addEventListener("click", function() {masking(this.value)});
-		document.querySelector("#unmasked-button").addEventListener("click", function() {masking(this.value)});
-		document.querySelector("#sent-to-mask-button").addEventListener("click", function() {masking(this.value)})
-		document.querySelector("#reset-button").addEventListener("click", switchEl);
-		document.querySelector("#dl-button").addEventListener("click", downloadSvg);
-		document.querySelector("#concealed-dl-link").addEventListener("click", function() { this.style.display = "none"; })
-		document.querySelector("#dash-array-field").addEventListener("input", function() { changeDashArray(this.value) });
-		document.querySelector("#stroke-width-field").addEventListener("change", function() { changeStrokeWidth(this.value) });
-		document.querySelector("#col-button").addEventListener("change", function() { changeColour(this.value) });
-		document.querySelector("#add-shape-button").addEventListener("click", function() { addShape(document.querySelector("#add-shape-menu").value);});
+		document.querySelector('#render-button').addEventListener("click", switchRender);
+		document.querySelector('#move-up-button').addEventListener("click", function() {move(1); });
+		document.querySelector('#move-down-button').addEventListener("click", function() {move(-1); });
+		document.querySelector('#masked-button').addEventListener("click", function() {masking(this.value)});
+		document.querySelector('#unmasked-button').addEventListener("click", function() {masking(this.value)});
+		document.querySelector('#sent-to-mask-button').addEventListener("click", function() {masking(this.value)})
+		document.querySelector('#reset-button').addEventListener("click", switchEl);
+		document.querySelector('#dl-button').addEventListener("click", downloadSvg);
+		document.querySelector('#concealed-dl-link').addEventListener("click", function() { this.style.display = "none"; })
+		document.querySelector('#dash-array-field').addEventListener("input", function() { changeDashArray(this.value) });
+		document.querySelector('#stroke-width-field').addEventListener("change", function() { changeStrokeWidth(this.value) });
+		document.querySelector('#col-button').addEventListener("change", function() { changeColour(this.value) });
 		var dragged = false;
 		var xhttp = new XMLHttpRequest();
 		var handleSize = 10;
@@ -68,54 +65,24 @@
 		var shapeMasking = []; // 2D array, 2 members in each subarray: boolean masked (false means part of mask) and a string, which for now is always = MASK_NAME; empty string, unmasked
 		const MASK_NAME = "mask1";
 		var selectedHandle = -1;
-		var selectedShapeId = 0; // there'll always be a shapes selected; start with first member of array selected
+		var selectedShape = 0; // there'll always be a shapes selected; start with first member of array selected
 		var svgObject;
-		function addShape(shapeType) {
-			//could have an array to translate between menu values and svg element names!
-			// sort out shapeMasking and shapes as follows: add an empty shape on top; copy all above selected to place above; create new shape; add it after selected; set unmasked; select new shape; call masking with unmasked - check shape can't cover handles
-			console.log("Adding", shapeType);
-			let newShape = document.createElementNS("http://www.w3.org/2000/svg", "line");
-			newShape.setAttributeNS(null, "x1", 200);
-			newShape.setAttributeNS(null, "y1", 200);
-			newShape.setAttributeNS(null, "x2", 205);
-			newShape.setAttributeNS(null, "y2", 205);
-			newShape.setAttributeNS(null, "stroke-dasharray", "1,1");
-			newShape.setAttributeNS(null, "stroke-width", 100);
-			newShape.setAttributeNS(null, "stroke", "#444466");
-			console.log("Built", newShape);
-			console.log("array len", shapes.length);
-			shapes.push(newShape);
-			console.log("array len", shapes.length);
-			shapeMasking.push(maskOpt(0, ""));
-			svgObject.appendChild(newShape);
-			console.log("Selection", selectedShapeId);
-			switchEl();
-			masking("unmasked");
-
-		}
-		function maskOpt(isMasked, name) {
-			let options = [];
-			options.push(isMasked);
-			options.push(name);
-			return options;
-		}
 		function masking(value) {
 			let maskingOptions = [];
-			let shape = shapes[selectedShapeId];
+			let shape = shapes[selectedShape];
 			console.log(shape);
 			let mask = document.getElementById(MASK_NAME); // assuming it's there, but we put it in during loading
 			if (value == "sent") {
-				shape.parentNode.removeChild(shape);
-				console.log("sent");
+				maskingOptions[0] = false;
+				maskingOptions[1] = MASK_NAME;
+				svgObject.removeChild(shape);
 				
-				if (mask.children != null && mask.children.length > 0) { // D'OH! I had this " length > 1" but of course there need only be 1+, not 2+ others, as current's been removed
+				if (mask.children != null && mask.children.length > 1) { // 2nd won't be evaluated if the array is null
 					console.log("Mask has multiple members now"); // FIXME deal with order... a little more complex than with shapes____________________________________________
 					let onTop = true;
-					for (i = selectedShapeId + 1; i < shapeMasking.length; i++) { // search for shapes in mask that are later in display order
-						console.log("checking position of", i, shapes[i]);
+					for (i = selectedShape + 1; i < shapeMasking.length; i++) { // search for shapes in mask that are later in display order
 						if (!shapeMasking[i][0] && shapeMasking[i][1] == MASK_NAME) {
-							console.log("inserted before", i);
-							mask.insertBefore(shape, shapes[i]);
+							mask.insertBefore(shape, selectedShape[i]);
 							onTop = false;
 							break;
 						}
@@ -129,16 +96,15 @@
 				else {
 					mask.appendChild(shape);
 				}
-				maskingOptions = maskOpt(false, MASK_NAME);
 				console.log("nwo a child of ", shape.parentNode);
 			}
 			else if (value == "masked") { 
 				console.log("y", shape);
 				shape.parentNode.removeChild(shape);
 				let onTop = true;
-				if (selectedShapeId < shapes.length - 1) { // if the currently selected shape is NOT the last i.e. NOT to be displayed on top
+				if (selectedShape < shapes.length - 1) { // if the currently selected shape is NOT the last i.e. NOT to be displayed on top
 					console.log("Searching where to slip in");
-					for (i = selectedShapeId + 1; i < shapes.length; i++) { //search for shapes later in display order
+					for (i = selectedShape + 1; i < shapes.length; i++) { //search for shapes later in display order
 						if (shapeMasking[i][0] || shapeMasking[i][1] == "") { // if the later shape is NOT in the mask, insert current shape before it in display order
 							console.log("shape", i,"is not In the mask")
 							svgObject.insertBefore(shape, shapes[i]);
@@ -154,8 +120,9 @@
 				
 				
 
-				maskingOptions = maskOpt(true, MASK_NAME);
-				shapes[selectedShapeId].setAttributeNS(null, "mask", "url(#" + MASK_NAME + ")");
+				maskingOptions[0] = true; //it's gonna be masked by...
+				maskingOptions[1] = MASK_NAME; // mask name
+				shapes[selectedShape].setAttributeNS(null, "mask", "url(#" + MASK_NAME + ")");
 				console.log("Setting mask");
 				
 			}
@@ -167,9 +134,9 @@
 				shape.setAttributeNS(null, "mask", "");
 				shape.parentNode.removeChild(shape);
 				let onTop = true;
-				if (selectedShapeId < shapes.length - 1) { // if the currently selected shape is NOT the last i.e. NOT to be displayed on top
+				if (selectedShape < shapes.length - 1) { // if the currently selected shape is NOT the last i.e. NOT to be displayed on top
 					console.log("searching for later shapes");
-					for (i = selectedShapeId + 1; i < shapes.length; i++) { //search for shapes later in display order
+					for (i = selectedShape + 1; i < shapes.length; i++) { //search for shapes later in display order
 						console.log("Shape", i, "is in the mask", shapeMasking[i][0]);
 						if (shapeMasking[i][0] || shapeMasking[i][1] == "") { // if the later shape is NOT in the mask, insert current shape before it in display order
 							svgObject.insertBefore(shape, shapes[i]);
@@ -179,15 +146,16 @@
 					}
 				}
 				if (onTop) { // it's last, add on top of other shapes
-					console.log("Shape ", selectedShapeId, "Top");
+					console.log("Shape ", selectedShape, "Top");
 					svgObject.appendChild(shape); 
 				}
 				
-				maskingOptions = maskOpt(false, "");
+				maskingOptions[0] = false;
+				maskingOptions[1] = "";
 			}
 
-			shapeMasking[selectedShapeId] = maskingOptions;
-			console.log(shapeMasking[selectedShapeId]);
+			shapeMasking[selectedShape] = maskingOptions;
+			console.log(shapeMasking[selectedShape]);
 		}
 		function switchRender() {
 			console.log(svgObject.getAttribute("shape-rendering"));
@@ -208,7 +176,7 @@
 		};
 		function move(amount) {
 			if (amount == 0) return;
-			var newPos = selectedShapeId + amount;
+			var newPos = selectedShape + amount;
 			if (newPos > shapes.length - 1) {
 				newPos = shapes.length - 1;
 			}
@@ -217,22 +185,22 @@
 			}
 			var increment = amount / Math.abs(amount); //find out which way to move, i.e. increment 1 or -1, in case amount was larger than 1 or less than -1
 			console.log(increment);
-			for (i = 0; i < (Math.abs(selectedShapeId - newPos)); i++) { //the selected shape moves along by 1 or -1, swapping with the shape in its target position, till it reaches newPos
-				tempShape = shapes[selectedShapeId];
-				tempMasking = shapeMasking[selectedShapeId];
-				shapes[selectedShapeId] = shapes[selectedShapeId + increment];
-				shapeMasking[selectedShapeId] = shapeMasking[selectedShapeId + increment];
-				shapes[selectedShapeId + increment] = tempShape;
-				shapeMasking[selectedShapeId + increment] = tempMasking;
-				selectedShapeId = selectedShapeId + increment;
+			for (i = 0; i < (Math.abs(selectedShape - newPos)); i++) { //the selected shape moves along by 1 or -1, swapping with the shape in its target position, till it reaches newPos
+				tempShape = shapes[selectedShape];
+				tempMasking = shapeMasking[selectedShape];
+				shapes[selectedShape] = shapes[selectedShape + increment];
+				shapeMasking[selectedShape] = shapeMasking[selectedShape + increment];
+				shapes[selectedShape + increment] = tempShape;
+				shapeMasking[selectedShape + increment] = tempMasking;
+				selectedShape = selectedShape + increment;
 			}
-			console.log("Position now " + selectedShapeId);
-			console.log("Shape masking array at", selectedShapeId, "is now", shapeMasking[selectedShapeId][0], shapeMasking[selectedShapeId][1]);
+			console.log("Position now " + selectedShape);
+			console.log("Shape maskgin", shapeMasking[selectedShape][0]);
 			let maskingState = "unmasked";
-			if (shapeMasking[selectedShapeId][0]) {
+			if (shapeMasking[selectedShape][0]) {
 				maskingState = "masked";
 			}
-			else if (shapeMasking[selectedShapeId][1] == MASK_NAME) {
+			else if (shapeMasking[selectedShape][1] == MASK_NAME) {
 				maskingState = "sent";
 			}
 			console.log("Reinserting shape with state", maskingState);
@@ -259,12 +227,9 @@
 			//Messy-----------------------------------------------
 			console.log("loade length" + loadedElements.length);
 			for (i = 0; i < loadedElements.length; i++) {
-				if (loadedElements[i].nodeName == "defs" | loadedElements[i].nodeName == "circle" |loadedElements[i].nodeName == "rect" | loadedElements[i].nodeName == "line" | loadedElements[i].nodeName == "path") {
+				if (loadedElements[i].nodeName == 'defs' | loadedElements[i].nodeName == 'circle' |loadedElements[i].nodeName == 'rect' | loadedElements[i].nodeName == 'line' | loadedElements[i].nodeName == 'path') {
 
 					shapes[j] = loadedElements[i].cloneNode(true);
-					if (shapes[j].nodeName == "path") {
-						shapes[j].setAttributeNS(null, "d", shapes[j].getAttributeNS(null, "d") + " M 0 0 M 500 500"); //mask clipping workaround!!
-					}
 					let maskingOptions = [];
 					maskingOptions[0] = false;
 					maskingOptions[1] = "";
@@ -314,32 +279,32 @@
 				console.log("Element copied to final SVG obj");
 			}
 
-			document.querySelector("#col-button").value = standardiseColour(shapes[selectedShapeId].getAttributeNS(null, "stroke"));
-			console.log(shapes.length, "elements loaded!");
+			document.querySelector("#col-button").value = standardiseColour(shapes[selectedShape].getAttributeNS(null, "stroke"));
+			console.log(shapes.length, 'elements loaded!');
 			//svgObject = 
 			setControls();
-			resetHandles(shapes[selectedShapeId]);
+			resetHandles(shapes[selectedShape]);
 
 			svgFrame.appendChild(svgObject);	
 	    }
 	    
 
-		//var svgObject = document.getElementById("vector");
+		//var svgObject = document.getElementById('vector');
 		function downloadSvg() {
 			for (i = 0; i < handles.length; i++) {
-				svgObject.removeChild(document.querySelector("#handle" + i));
+				svgObject.removeChild(document.querySelector('#handle' + i));
 				console.log("removed handles");
 			}
 			var svgArray = [];
 			svgText = '<svg xmlns="http://www.w3.org/2000/svg" id="vector" viewBox="0 0 500 500" height="500" width="500" shape-rendering="crispEdges">';
-			svgText += svgObject.innerHTML + "</svg>";
+			svgText += svgObject.innerHTML + '</svg>';
 			svgArray[0] = svgText;
-			var blob = new Blob(svgArray, {type: "text/html"});
-			var link = document.querySelector("#concealed-dl-link");
-			link.style.display = "inline";
+			var blob = new Blob(svgArray, {type: 'text/html'});
+			var link = document.querySelector('#concealed-dl-link');
+			link.style.display = 'inline';
 			link.href = URL.createObjectURL(blob);
-			link.download = new Date().toLocaleString() + ".svg";
-			resetHandles(shapes[selectedShapeId]);
+			link.download = new Date().toLocaleString() + '.svg';
+			resetHandles(shapes[selectedShape]);
 		}
 		function standardiseColour(str){ //Thanks to JayB on SO
 		    var ctx = document.createElement("canvas").getContext("2d");
@@ -350,42 +315,42 @@
 			for (i = 0; i < handles.length; i++) {
 				console.log(i);
 				console.log(svgObject);
-				console.log(svgObject.querySelector("#handle" + i));
-				svgObject.removeChild(svgObject.querySelector("#handle" + i));
+				console.log(svgObject.querySelector('#handle' + i));
+				svgObject.removeChild(svgObject.querySelector('#handle' + i));
 			}
-			if (selectedShapeId  < shapes.length - 1) { selectedShapeId++; } else { selectedShapeId = 0; }
-			document.querySelector("#col-button").value = standardiseColour(shapes[selectedShapeId].getAttributeNS(null, "stroke"));
-			resetHandles(shapes[selectedShapeId]);
-			console.log("Shape no.", selectedShapeId);
+			if (selectedShape  < shapes.length - 1) { selectedShape++; } else { selectedShape = 0; }
+			document.querySelector("#col-button").value = standardiseColour(shapes[selectedShape].getAttributeNS(null, "stroke"));
+			resetHandles(shapes[selectedShape]);
+			console.log("Shape no.", selectedShape);
 			setControls();
 		}
 		function changeStrokeWidth(val) {
-			shapes[selectedShapeId].setAttributeNS(null, "stroke-width", val);
+			shapes[selectedShape].setAttributeNS(null, 'stroke-width', val);
 		}
 		function changeColour(val) {
-			shapes[selectedShapeId].setAttributeNS(null, "stroke", val);
+			shapes[selectedShape].setAttributeNS(null, 'stroke', val);
 		}
 		function changeDashArray(val) {
-			shapes[selectedShapeId].setAttributeNS(null, "stroke-dasharray", val);
+			shapes[selectedShape].setAttributeNS(null, 'stroke-dasharray', val);
 		}
 		function manifestHandle(x, y) {
 			console.log("make");
-			var newHandle = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-			newHandle.setAttributeNS(null, "x", x - handleSize / 2); //handle is around centre point
-			newHandle.setAttributeNS(null, "y", y - handleSize / 2);
-			newHandle.setAttributeNS(null, "width", handleSize);
-			newHandle.setAttributeNS(null, "height", handleSize);
-			newHandle.setAttributeNS(null, "fill", "red");
-			newHandle.setAttributeNS(null, "class", "draggable");
-			newHandle.setAttributeNS(null, "id", "handle" + i);
+			var newHandle = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+			newHandle.setAttributeNS(null, 'x', x - handleSize / 2); //handle is around centre point
+			newHandle.setAttributeNS(null, 'y', y - handleSize / 2);
+			newHandle.setAttributeNS(null, 'width', handleSize);
+			newHandle.setAttributeNS(null, 'height', handleSize);
+			newHandle.setAttributeNS(null, 'fill', 'red');
+			newHandle.setAttributeNS(null, 'class', 'draggable');
+			newHandle.setAttributeNS(null, 'id', 'handle' + i);
 			newHandle.addEventListener("mousedown", startDragging);
 			document.addEventListener("mousemove", drag);
 			newHandle.addEventListener("mouseup", endDragging);
-			console.log("hwre is it??" + newHandle.getAttributeNS(null, "id") + x + y);
+			console.log("hwre is it??" + newHandle.getAttributeNS(null, 'id') + x + y);
 			svgObject.appendChild(newHandle);
 		}
 		function getId(handle) {
-			return handle.getAttributeNS(null, "id").charAt(6);
+			return handle.getAttributeNS(null, 'id').charAt(6);
 		}
 		function startDragging(e) {
 			console.log("boom");
@@ -393,9 +358,9 @@
 			selectedHandle = getId(thisHandle);
 			grabX = e.offsetX - handles[selectedHandle][0];
 			grabY = e.offsetY - handles[selectedHandle][1];
-			console.log("Graby" + grabX);
-			console.log("Graby" + grabY);
-			console.log((handles[selectedHandle][0]) + " " + (handles[selectedHandle][1])); 
+			console.log('Graby' + grabX);
+			console.log('Graby' + grabY);
+			console.log((handles[selectedHandle][0]) + ' ' + (handles[selectedHandle][1])); 
 		}
 		function drag(e) {
 			if (selectedHandle >= 0) { //drawing the lines is making it hard to mouseup
@@ -403,13 +368,13 @@
 				newY = e.offsetY - grabY;
 				handles[selectedHandle][0] = newX;
 				handles[selectedHandle][1] = newY;
-				console.log((handles[selectedHandle][0]) + " " + (handles[selectedHandle][1])); 
-				handle = document.querySelector("#handle" + selectedHandle);
-				handle.setAttributeNS(null, "x", newX - handleSize / 2); //this should be a method that handles it in one place
-				handle.setAttributeNS(null, "y", newY - handleSize / 2);
+				console.log((handles[selectedHandle][0]) + ' ' + (handles[selectedHandle][1])); 
+				handle = document.querySelector('#handle' + selectedHandle);
+				handle.setAttributeNS(null, 'x', newX - handleSize / 2); //this should be a method that handles it in one place
+				handle.setAttributeNS(null, 'y', newY - handleSize / 2);
 				time = new Date();
 				redrawHandles(); // so they'll be displayed on top - quick and dirty fix
-				updateShape(shapes[selectedShapeId], selectedHandle);
+				updateShape(shapes[selectedShape], selectedHandle);
 				console.log("Update took", new Date() - time);	//this shows that it's not the function call to UpdateShape that takes time, it's the browser rendering after
 			}
 		}
@@ -420,7 +385,7 @@
 		}
 		function redrawHandles() {
 			for (i = 0; i < handles.length; i++) {
-				handle = svgObject.querySelector("#handle" + i);
+				handle = svgObject.querySelector('#handle' + i);
 				svgObject.removeChild(handle);
 				svgObject.appendChild(handle); //quick fix of order of displaying
 			}
@@ -428,53 +393,50 @@
 		function updateShape(shape, handleId) {
 			//dragUpdates += 1;
 			//console.log("Update " + dragUpdates);
-			var stroke = shape.getAttributeNS(null, "stroke");
+			var stroke = shape.getAttributeNS(null, 'stroke');
 			
-			if (shape.nodeName == "line") {
+			if (shape.nodeName == 'line') {
 				handleX = handles[handleId][0];
 				handleY = handles[handleId][1];
 				if (handleId== 0){
 				
-					shape.setAttributeNS(null, "x1", handleX);
-					shape.setAttributeNS(null, "y1", handleY);
+					shape.setAttributeNS(null, 'x1', handleX);
+					shape.setAttributeNS(null, 'y1', handleY);
 				}
 				else {
-					shape.setAttributeNS(null, "x2",handleX);
+					shape.setAttributeNS(null, 'x2',handleX);
 
-					shape.setAttributeNS(null, "y2", handleY);
+					shape.setAttributeNS(null, 'y2', handleY);
 				}
 			}
-			else if (shape.nodeName =="circle") { //leave r for a second
-				shape.setAttributeNS(null, "cx", handles[0][0]);
-				shape.setAttributeNS(null, "cy", handles[0][1]);
+			else if (shape.nodeName =='circle') { //leave r for a second
+				shape.setAttributeNS(null, 'cx', handles[0][0]);
+				shape.setAttributeNS(null, 'cy', handles[0][1]);
 			}
-			else if (shape.nodeName == "path") { //FIXME again the assumption that all paths will have data of form M x y q x y x y
+			else if (shape.nodeName == 'path') { //FIXME again the assumption that all paths will have data of form M x y q x y x y
 				var startX = Number(handles[0][0]);
 				var startY = Number(handles[0][1]);
-				var data = "M " + startX + " " + startY + " q " + (handles[1][0] - startX) + " " + (handles[1][1] - startY) + " " + (handles[2][0]- startX) + " " + (handles[2][1] - startY) + " M 0 0 M 500 500";
+				var data = 'M ' + startX + ' ' + startY + ' q ' + (handles[1][0] - startX) + ' ' + (handles[1][1] - startY) + ' ' + (handles[2][0]- startX) + ' ' + (handles[2][1] - startY);
 				console.log(data);
-				shape.setAttributeNS(null, "d", data);
+				shape.setAttributeNS(null, 'd', data);
 
 			}
-			//shape.setAttributeNS(null, "stroke-width", 500);
-			shape.setAttributeNS(null, "stroke", stroke);
-			//shape.setAttributeNS(null, "stroke-dasharray", "1,2,1,2,1,1,1,2");
-			//shape.setAttributeNS(null, "mask", "url(#mask1"); //overall mask for all shapes
+			//shape.setAttributeNS(null, 'stroke-width', 500);
+			shape.setAttributeNS(null, 'stroke', stroke);
+			//shape.setAttributeNS(null, 'stroke-dasharray', '1,2,1,2,1,1,1,2');
+			//shape.setAttributeNS(null, 'mask', 'url(#mask1'); //overall mask for all shapes
 
 			
 
 		}
 		function getPathCoords(el) {	// a basic version of what's to come - assume paths only have an M and a q command, in that order
 			console.log("getting corods?");
-
-
-			var data = el.getAttributeNS(null, "d");
+			var data = el.getAttributeNS(null, 'd');
 			var parts = [];
 			pairs = [];
-			parts = data.split(" ");
-			// w/o workaround: if (parts.length > 14 || parts[0] !== 'M' || parts[3] !== 'q') { window.alert('Full data string parsing for path elements not implemented yet!'); debugger; }
-			if (parts.length > 14 || parts[0] !== "M" || parts[3] !== "q") { window.alert("Full data string parsing for path elements not implemented yet!"); debugger; }
-			// FIXME MASSIVE ASSUMPTIONS BELOW - implement actual parsing! But this hardcoding makes my workaround easy - I simply don't read the invisible commands (so they don't get handles)
+			parts = data.split(' ');
+			if (parts.length > 8 || parts[0] !== 'M' || parts[3] !== 'q') { window.alert('Full data string parsing for path elements not implemented yet!'); debugger; }
+			// FIXME MASSIVE ASSUMPTIONS BELOW - implement actual parsing!
 			startX = Number(parts[1]);
 			startY = Number(parts[2]);
 			pairs[0]= [startX, startY];
@@ -488,18 +450,18 @@
 			console.log("reset, called with " + el.nodeName);
 			handles = [];
 			
-			if (el.nodeName == "path") {
+			if (el.nodeName == 'path') {
 				handles = getPathCoords(el);
 				console.log(handles);
 			}
-			else if (el.nodeName == "line") {
+			else if (el.nodeName == 'line') {
 				for (i = 0; i < 2; i++) {
-					handles.push([el.getAttributeNS(null, "x" + (i + 1)), el.getAttributeNS(null, "y" + (i + 1))]);
+					handles.push([el.getAttributeNS(null, 'x' + (i + 1)), el.getAttributeNS(null, 'y' + (i + 1))]);
 				}
 
 			}
-			else if (el.nodeName =="circle") {
-				handles.push([el.getAttributeNS(null, "cx"), el.getAttributeNS(null, "cy")]);
+			else if (el.nodeName =='circle') {
+				handles.push([el.getAttributeNS(null, 'cx'), el.getAttributeNS(null, 'cy')]);
 			}
 			console.log("handles leng" + handles.length);
 			for (i = 0; i < handles.length; i++) {
@@ -508,13 +470,13 @@
 		}
 		function setControls() {
 			console.log("Switching vals");
-			document.querySelector("#dash-array-field").value = shapes[selectedShapeId].getAttributeNS(null, "stroke-dasharray");
-			document.querySelector("#stroke-width-field").value = shapes[selectedShapeId].getAttributeNS(null, "stroke-width");
-			if (shapeMasking[selectedShapeId][0] == true) {
+			document.querySelector('#dash-array-field').value = shapes[selectedShape].getAttributeNS(null, 'stroke-dasharray');
+			document.querySelector('#stroke-width-field').value = shapes[selectedShape].getAttributeNS(null, 'stroke-width');
+			if (shapeMasking[selectedShape][0] == true) {
 				document.getElementById("masked-button").checked = true;
 			}
 			else {
-				if (shapeMasking[selectedShapeId][1] != "") {
+				if (shapeMasking[selectedShape][1] != "") {
 					document.getElementById("sent-to-mask-button").checked = true;
 				}
 				else {

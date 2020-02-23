@@ -2,6 +2,16 @@ body {
 	font-family: 'Aleo', serif;
 	box-sizing: border-box;
 }
+
+
+#add-shape-button {
+	display: inline;
+}
+
+#add-shape-menu {
+	display: inline;
+}
+
 .moire-button {
 	font-family: 'Aleo', serif;
 	font-size: 1em;

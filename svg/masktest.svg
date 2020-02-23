@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="500" height="500" shape-rendering="crispEdges">
+	<defs>
+		<mask id="mask1">
+			<rect width="500" height="500" fill="#ffffff" stroke-width="1"></rect>
+			<rect x="40" y="200" width="400" height="100" fill="#666666"></rect>
+
+			<rect x="40" y="20" width="400" height="100" fill="#666666"></rect>
+		</mask>
+	</defs>
+	<circle cx="250" cy="250" r="150" fill="#4455AA" mask="url(#mask1)"></circle>
+</svg>
