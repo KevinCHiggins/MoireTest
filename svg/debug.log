@@ -1,0 +1,9 @@
+[0224/150248.914:ERROR:filesystem_win.cc(148)] DeleteFile C:\Users\Kevin\AppData\Local\Slimjet\User Data\Crash Reports\render_5.dmp\71316322-08d1-47da-aa33-479b67b94f5f: The system cannot find the path specified. (0x3)
+[0224/150248.914:ERROR:crash_report_exception_handler.cc(144)] FinishedWritingCrashReport failed
+[0224/150431.031:ERROR:filesystem_win.cc(148)] DeleteFile C:\Users\Kevin\AppData\Local\Slimjet\User Data\Crash Reports\render_1.dmp\3723b532-fb8a-4b05-9f73-90d6453861a9: The system cannot find the path specified. (0x3)
+[0224/150431.031:ERROR:crash_report_exception_handler.cc(144)] FinishedWritingCrashReport failed
+[0224/150516.196:ERROR:filesystem_win.cc(148)] DeleteFile C:\Users\Kevin\AppData\Local\Slimjet\User Data\Crash Reports\render_2.dmp\361f7bbc-d97f-40cc-992b-10f1ce37cf57: The system cannot find the path specified. (0x3)
+[0224/150516.196:ERROR:crash_report_exception_handler.cc(144)] FinishedWritingCrashReport failed
+[0224/150601.369:ERROR:filesystem_win.cc(148)] DeleteFile C:\Users\Kevin\AppData\Local\Slimjet\User Data\Crash Reports\render_3.dmp\0473e758-ac1b-41d4-936b-75ef19c9f10f: The system cannot find the path specified. (0x3)
+[0224/150601.369:ERROR:crash_report_exception_handler.cc(144)] FinishedWritingCrashReport failed
+[0224/151345.750:ERROR:prune_crash_reports.cc(34)] PruneCrashReportDatabase: Failed to get pending reports

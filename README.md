@@ -5,6 +5,28 @@ See it in action [here](https://kevinchiggins.github.io/MoireTest/)!!
 
 As this is an experimental prototype, I'll use a devlog format (with dated entries, most recent first) rather than write documentation as such. And I'll freely bust wild ideas without concern for if/when they get done.
 
+#### 25/02/20
+
+13. Working rect!
+14. Duplicate shape button
+15. UI nice to haves
+    - disable edits when all deleted
+    - a preview button to hide handles (maybe piggyback on previous!)
+    - use hatching and moire made in the app, as backgrounds for hip UI elements? 
+    - make a grid layout or some such for buttons
+    - a foldable panel so it's usable on phones
+
+16. Other nice to haves
+    - dash thinning function
+    - move all
+    - radius handle (needs logic for circles in corners)
+
+#### 24/02/20
+
+Just realised (actually, remembered about the idea from a day ago) that a "Duplicate shape" button would provide much the same as a (far more complex) multi-shape feature in terms of two-colour "blends" made by overlaying two dashed strokes with one having thinner dashes. Just get the curve into place, then duplicate. The finicky changing the dashes would've had to be done anyway, all I lose is a calculator to do it for me - which I could implement separately if I want.
+
+Not gonna work on this today though, I have other things to do.
+
 #### 23/02/20
 
 Bug hunting. Realised that the **bad variable name** selectedShape I called out a few days ago was leading to mistakes again and I've probably cumulatively lost an hour due to it... in future I will rename instantly if I notice such. Now it's selectedShapeId.
@@ -33,13 +55,6 @@ Remaining use cases:
     - need to sort it so all shapes have a stroke of the same colour (a handy but I think appropriate simplification)
 11. [DONE] Get workaround into save-load!! And tidied it up a micron
 12. [DONE] Get masking into save-load!! Heheh, I have to extract shapes from the mask... now, they will lose their order in the original session but that's fine - overall order is just a way of dealing with things within the app - so, I'll simply put them on top of the array
-13. Working rect!
-14. Multi-object/blend, say just for curves - it's a tasty effect!
-15. UI nice to haves
-    - disable edits when all deleted
-    - a preview button to hide handles (maybe piggyback on previous!)
-    - use hatching and moire made in the app, as backgrounds for hip UI elements? 
-    - make a grid layout or some such
 
 Then I want to make a gallery (prob with screenshots) for this readme, and I'm done! Time to write a blog post about it.
 
