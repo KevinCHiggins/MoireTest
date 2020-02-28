@@ -5,21 +5,32 @@ See it in action [here](https://kevinchiggins.github.io/MoireTest/)!!
 
 As this is an experimental prototype, I'll use a devlog format (with dated entries, most recent first) rather than write documentation as such. And I'll freely bust wild ideas without concern for if/when they get done.
 
-#### 25/02/20
+#### 28/02/20
 
-13. Working rect!
-14. Duplicate shape button
-15. UI nice to haves
+*Has a busy couple of days with school work*
+
+[FIXED]Bug: All shapes incorrectly reported as masked on load
+
+13. [DONE] Working rect!
+
+    - handles able to pass beyond each other... **which requires** 4 handles rather than two
+
+14. Duplicate shape button... mmm I think the blend is still cooler... but duplicate shapes'd help too
+
+15. Nice to haves
+
     - disable edits when all deleted
+    - previous shape button?
+    - deal with erroneous snaps when dragging goes out of range
     - a preview button to hide handles (maybe piggyback on previous!)
-    - use hatching and moire made in the app, as backgrounds for hip UI elements? 
+    - use hatching and moire made in the app, as backgrounds for hip UI elements? **Yeah!**
     - make a grid layout or some such for buttons
     - a foldable panel so it's usable on phones
 
-16. Other nice to haves
     - dash thinning function
     - move all
     - radius handle (needs logic for circles in corners)
+
 
 #### 24/02/20
 
@@ -261,7 +272,7 @@ ___
 
 **Some thoughts**
 
-I turned off hard pixels and it didn't look much difference, just smoother, and, let's be honest, easier on the eye. So maybe that needn't be central to the vision. Other possibilities are that I use beefy square pixels to lesson the harsh graininess. I also experimented with zooming in and realised that there are two effects that I thought were moiré: one is the classic shimmering subpatterns and depends on rounding to the pixel, and disappears on zooming out - **but**, other effects like the shimmering hair one still can be seen even when individual lines are well-rendered, and finally **moiré from one object painting over itself** seems to similarly sustain when zoomed in.
+I turned off hard pixels and it didn't look much difference, just smoother, and, let's be honest, easier on the eye. So maybe that needn't be central to the vision. Other possibilities are that I use beefy square pixels to lessen the harsh graininess. I also experimented with zooming in and realised that there are two effects that I thought were moiré: one is the classic shimmering subpatterns and depends on rounding to the pixel, and disappears on zooming out - **but**, other effects like the shimmering hair one still can be seen even when individual lines are well-rendered, and finally **moiré from one object painting over itself** seems to similarly sustain when zoomed in.
 
 ### 13/02/20
 
@@ -321,7 +332,7 @@ ___
 That's all direction for the future, which I include here to excite me about the potential of subversive SVG. However, this particular app, MoiréTest, is to prototype something specific: a JavaScript user interface for controlling a handful of elements in an SVG object (with shapeRendering="crisp-edges") in idiomatic ways:
 
 - lines and curves with wide stroke width and a dash array to make lots of small lines and so moiré
-- multiple copies of similar lines/curves with different stroke width and dash array to create complex softenings and gradations
+- multiple copies of similar lines/curves with different stroke width and dash array to create complex softenings and gradations [EDIT 28/02/20: what I later call a blend]
 - complex masking of the lines/curves - e.g. generated from the original shape, plus cropping options
 - all controlled by HTML buttons generated on the fly in a side panel, to select objects (to avoid complexities of draggable objects - i.e. stacking, window borders)
 - and handles to move the vertices/control points of objects

@@ -18,7 +18,7 @@
 			<div class="control-panel">
 				<h4>Edit selected shape</h4><label for="dash-array-field">Stroke dash array</label>
 				<input type="text" value="1,1" id="dash-array-field" /><label for="stroke-width-field">Stroke width</label><input type="number" placeholder="1" max="500" min="0" value="40" id="stroke-width-field" />
-				<label id="disabled-radius-label" for="disabled-radiusfield">Radius</label><input id="disabled-radius-field" type="number" placeholder="1" max="500" min="0" value="40" />
+				<label id="disabled-radius-label" for="disabled-radius-field">Radius</label><input id="disabled-radius-field" type="number" placeholder="1" max="500" min="0" value="40" />
 				<input class="moire-button" type="button" value="Move up" id="move-up-button" />
 				<input class="moire-button" type="button" value="Move down" id="move-down-button" />
 				<label for="masked-button">Masked</label>
@@ -76,7 +76,7 @@
 		var shapes = [];
 		var shapeMasking = []; // 2D array, 2 members in each subarray: boolean masked (false means part of mask) and a string, which for now is always = MASK_NAME; empty string, unmasked
 		const MASK_NAME = "mask1";
-		var filename = "svg/separate.svg";
+		var filename = "svg/desert.svg";
 		const CLIPPING_WORKAROUND = " M 0 0 M 500 500";
 		var loadedDefinitions;
 		var selectedHandle = -1;
@@ -155,7 +155,7 @@
 
 				// need to shift up! Start by creating the new space (actually by pushing the last element up into it)
 				let origTopPos = shapes.length - 1;
-				shapes.push(shapes[origTopPos]);
+				shapes.push(shapes[origTopPos]); 
 				console.log("After push it", shapes);
 				shapeMasking.push(shapeMasking[origTopPos]);
 				for (i = shapes.length - 2; i > selectedShapeId; i--) { // note: if the new shape is being inserted 2nd last, this won't run at all
@@ -341,7 +341,7 @@
 			var j = 0;
 			//Messy-----------------------------------------------
 			console.log("loade length" + loadedElements.length);
-			var maskedShapes = []; // initialise to an empty array - maybe no masked shapes will be loaded in which case the loop at the end of this function will run 0x
+			var shapesInMask = []; // initialise to an empty array - maybe no masked shapes will be loaded in which case the loop at the end of this function will run 0x
 			for (i = 0; i < loadedElements.length; i++) {
 				if (loadedElements[i].nodeName == "defs") { // only compatible with one defs element, which I think is fair enough
 					loadedDefinitions = loadedElements[i].cloneNode();
@@ -350,8 +350,8 @@
 				}
 				// put masked shapes into their own array for the mo
 				console.log(loadedDefinitions);
-				maskedShapes = loadedDefinitions.getElementsByTagName("mask")[0].children;
-				console.log(maskedShapes);
+				shapesInMask = loadedDefinitions.getElementsByTagName("mask")[0].children;
+				console.log(shapesInMask);
 
 				if (loadedElements[i].nodeName == "circle" |loadedElements[i].nodeName == "rect" | loadedElements[i].nodeName == "line" | loadedElements[i].nodeName == "path") {
 
@@ -370,10 +370,11 @@
 					// FIXME load masking info!
 					let maskingOptions = [];
 					let maskString = shapes[j].getAttributeNS(null, "mask");
+					console.log("shape",j,"String",maskString,".");
 					var maskName = ""; // a default option ... going with var for scoping
 					maskingOptions[0] = false; // default is not masked
-					if (maskString != undefined) {
-						maskName = maskString.substring(5, maskString.length - 1);
+					if (maskString.length > 0) {
+						maskName = "url(#" + maskString.substring(5, maskString.length - 1)+ ")";
 						maskingOptions[0] = true; // it is masked!
 						console.log("Found (within a shape not itself in a mask) mask ref named ", maskName);
 					}
@@ -427,9 +428,9 @@
 				console.log("Element copied to final SVG obj");
 			}
 
-			// add all shapes within the mask to the shapes array - in this case, I throw them on the top (having lost original order info) - and fill in their different masking options
-			for (i = 0; i < maskedShapes.length; i++) {
-				shapes.push(maskedShapes[i]);
+			// add all shapes within the mask to the shapes array - in this case, I throw them on the top (having lost original order info) - and fill in the appropriate masking options
+			for (i = 0; i < shapesInMask.length; i++) {
+				shapes.push(shapesInMask[i]);
 				shapeMasking.push([false, "mask1"]);
 			}
 
@@ -592,7 +593,7 @@
 				handle.setAttributeNS(null, "y", newY - handleSize / 2);
 				time = new Date();
 				redrawHandles(); // so they'll be displayed on top - quick and dirty fix
-				updateShape(shapes[selectedShapeId], selectedHandle);
+				updateShape(shapes[selectedShapeId]);
 				console.log("Update took", new Date() - time);	//this shows that it's not the function call to UpdateShape that takes time, it's the browser rendering after
 			}
 		}
@@ -608,15 +609,15 @@
 				svgObject.appendChild(handle); //quick fix of order of displaying
 			}
 		}
-		function updateShape(shape, handleId) {
+		function updateShape(shape) {
 			//dragUpdates += 1;
 			//console.log("Update " + dragUpdates);
 			var stroke = shape.getAttributeNS(null, "stroke");
 			
 			if (shape.nodeName == "line") {
-				handleX = handles[handleId][0];
-				handleY = handles[handleId][1];
-				if (handleId== 0){
+				handleX = handles[selectedHandle][0];
+				handleY = handles[selectedHandle][1];
+				if (selectedHandle== 0){
 				
 					shape.setAttributeNS(null, "x1", handleX);
 					shape.setAttributeNS(null, "y1", handleY);
@@ -626,6 +627,58 @@
 
 					shape.setAttributeNS(null, "y2", handleY);
 				}
+			}
+			else if (shape.nodeName == "rect") { // find bounds of rectangle determined by current handle and opposite handle, while finding new handle id;
+												// realise bounds as rect; reset handles
+
+				// id of opposite handle, found by bitwise NOT (and a mask to avoid getting the 1's complement)
+				var oppHandle = ~selectedHandle & 3;
+
+				var newHandleId = 0; // we'll build up the newHandleId (either 0, 1, 2 or 3 - a new place in the handles array for the handle which is perceptually 
+				// the same as the previous selected handle before update, i.e. under the mouse) logically while determining the 
+				// variables for the new bounds
+				var newLeft, newRight, newTop, newBottom;
+				// find new bounds (i.e. not of currently stored rect but rect determined by current handle position and its opposite handle which hasn't moved)
+				if (handles[oppHandle][0] > handles[selectedHandle][0]) {
+					newLeft = handles[selectedHandle][0]; 
+					newRight = handles[oppHandle][0];
+				}
+				else {
+					newLeft = handles[oppHandle][0];
+					newRight = handles[selectedHandle][0];
+					newHandleId += 2; // selected handle is further right than opposite handle, so set flag for right
+				}
+				if (handles[oppHandle][1] > handles[selectedHandle][1]) {
+					newTop = handles[selectedHandle][1]; 
+					newBottom = handles[oppHandle][1];
+				}
+				else {
+					newTop = handles[oppHandle][1];
+					newBottom = handles[selectedHandle][1];
+					newHandleId += 1; // selected handle is further down than opposite handle, so set flag for bottom
+				}
+				selectedHandle = newHandleId;
+				// realise bounds as rectangle settings/parameters
+				shape.setAttributeNS(null, "x", newLeft);
+				shape.setAttributeNS(null, "y", newTop);
+				shape.setAttributeNS(null, "width", newRight - newLeft);
+				shape.setAttributeNS(null, "height", newBottom - newTop);
+				handles[0][0] = handles[1][0] = newLeft;
+				handles[2][0] = handles[3][0] = newRight;
+				handles[0][1] = handles[2][1] = newTop;
+				handles[1][1] = handles[3][1] = newBottom;
+				refreshRectHandles(shape);
+				/*
+				handles[0][0] = newLeft;
+				handles[2][0] = newRight;
+				handles[0][1] = newTop;
+				handles[1][1] = newBottom;
+				handles[1][0] = newLeft;
+				handles[3][0] = newRight;
+				handles[2][1] = newTop;
+				handles[3][1] = newBottom;
+				*/
+				
 			}
 			else if (shape.nodeName =="circle") { //leave r for a second
 				shape.setAttributeNS(null, "cx", handles[0][0]);
@@ -667,6 +720,29 @@
 			
 			return pairs;
 		}
+		function refreshRectHandles(shape) {
+			for (i = 0; i < handles.length; i++) {
+				console.log(i);
+				console.log(svgObject);
+				console.log(svgObject.querySelector("#handle" + i));
+				svgObject.removeChild(svgObject.querySelector("#handle" + i));
+			}
+			resetHandles(shape);
+			/*
+			handles = [];
+			let rectWidth = parseInt(el.getAttributeNS(null, "width"));
+			let rectHeight = parseInt(el.getAttributeNS(null, "height"));
+			// handleId will be a 2-bit bitflag: 1 indicates bottom rather than top, 2 indicates right rather than left
+			handles.push([el.getAttributeNS(null, "x"), el.getAttributeNS(null, "y")]); // 0 + 0 top left
+			handles.push([el.getAttributeNS(null, "x"), parseInt(el.getAttributeNS(null, "y")) + rectHeight]); // 0 + 1 bottom left
+			handles.push([parseInt(el.getAttributeNS(null, "x")) + rectWidth, el.getAttributeNS(null, "y")]); // 2 + 0 top right
+			handles.push([parseInt(el.getAttributeNS(null, "x")) + rectWidth, parseInt(el.getAttributeNS(null, "y")) + rectHeight]); // 2 + 1 bottom right
+			for (i = 0; i < handles.length; i++) {
+				manifestHandle(handles[i][0], handles[i][1]);
+			}
+			console.log("handles", handles);
+			*/
+		}
 		function resetHandles(el) { // pass which element you want to handles to control
 			console.log("reset, called with " + el.nodeName);
 			handles = [];
@@ -680,6 +756,17 @@
 					handles.push([el.getAttributeNS(null, "x" + (i + 1)), el.getAttributeNS(null, "y" + (i + 1))]);
 				}
 
+			}
+			else if (el.nodeName == "rect") {
+				let rectWidth = parseInt(el.getAttributeNS(null, "width"));
+				let rectHeight = parseInt(el.getAttributeNS(null, "height"));
+				// handleId will be a 2-bit bitflag: 1 indicates bottom rather than top, 2 indicates right rather than left
+				handles.push([el.getAttributeNS(null, "x"), el.getAttributeNS(null, "y")]); // 0 + 0 top left
+				handles.push([el.getAttributeNS(null, "x"), parseInt(el.getAttributeNS(null, "y")) + rectHeight]); // 0 + 1 bottom left
+				handles.push([parseInt(el.getAttributeNS(null, "x")) + rectWidth, el.getAttributeNS(null, "y")]); // 2 + 0 top right
+				handles.push([parseInt(el.getAttributeNS(null, "x")) + rectWidth, parseInt(el.getAttributeNS(null, "y")) + rectHeight]); // 2 + 1 bottom right
+				
+				console.log("handles", handles);
 			}
 			else if (el.nodeName =="circle") {
 				handles.push([el.getAttributeNS(null, "cx"), el.getAttributeNS(null, "cy")]);
@@ -705,6 +792,7 @@
 			console.log("IS filled?", shapes[selectedShapeId].getAttributeNS(null, "fill") != "none");
 			console.log("Is selected?", document.getElementById("fill-button").checked);
 			if (shapeMasking[selectedShapeId][0] == true) {
+				console.log("shapeMasking for",selectedShapeId,"=",shapeMasking[selectedShapeId][0]);
 				document.getElementById("masked-button").checked = true;
 			}
 			else {
