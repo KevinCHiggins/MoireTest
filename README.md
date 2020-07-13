@@ -1,7 +1,9 @@
 # MoiréTest
 See it in action [here](https://kevinchiggins.github.io/MoireTest/)!!
 
- UI prototype in JavaScript for manipulating hard-pixel (? - see 14/02/20) SVG moiré art
+ UI prototype in JavaScript for manipulating SVG moiré art
+ 
+ "Moiré" is a general name for visible interference patterns - this app in particular uses aliasing to accentuate moiré from overlaid SVG curves and lines that abuse the "dashed-stroke" property. By making the lines really fat, the dashes are stretched way out into fins.
 
 As this is an experimental prototype, I'll use a devlog format (with dated entries, most recent first) rather than write documentation as such. And I'll freely bust wild ideas without concern for if/when they get done.
 
