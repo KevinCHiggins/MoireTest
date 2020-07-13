@@ -76,6 +76,12 @@ label {
 	border: thin solid grey;
 
 }
+.svg-panel-820 {
+	width: 820px;
+	float: left;
+	border: thin solid grey;
+
+}
 .control-panel {
 
 	max-width: 350px;
