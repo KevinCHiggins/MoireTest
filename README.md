@@ -7,8 +7,6 @@ As this is an experimental prototype, I'll use a devlog format (with dated entri
 
 #### 28/02/20
 
-*Has a busy couple of days with school work*
-
 [FIXED]Bug: All shapes incorrectly reported as masked on load
 
 13. [DONE] Working rect!
