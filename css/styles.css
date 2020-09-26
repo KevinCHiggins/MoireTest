@@ -1,4 +1,6 @@
 body {
+	background-color: #03120e;
+	color: #00d7d9;
 	font-family: 'Aleo', serif;
 	box-sizing: border-box;
 }
@@ -13,19 +15,48 @@ body {
 	margin-top: 4px;
 	margin-bottom: 4px;
 	padding-bottom: 4px;
-
+	
 	font-family: 'Aleo', serif;
 	font-size: 1em;
 	box-sizing: border-box;
+	border-style: solid;
+	border-width: 1px;
+	border-color: #26413c;
+	margin: 4px;
+	color: #00d7d9;
+	background-color: #03120e;
+}
+
+#add-shape-menu:focus {
+	outline-style: dashed;
+	outline-color: #26413c;
+	outline-offset: 1px;
 }
 
 .moire-button {
+	border-style: solid;
+	background-color: #26413c;
+	//border-color: #03120e;
+	color: #00d7d9;
 	font-family: 'Aleo', serif;
 	font-size: 1em;
 }
 
-.moire-button-inline {
+.moire-button-download  {
+	border-style: solid;
+	background-color: #26413c;
+	//border-color: #03120e;
+	color: #7f5ba5;
+	font-family: 'Aleo', serif;
+	font-size: 1em;
+	font-weight: bold;
+}
 
+.moire-button-inline {
+	border-style: solid;
+	background-color: #26413c;
+//border-color: #03120e;
+	color: #00d7d9;
 	font-family: 'Aleo', serif;
 	font-size: 1em;
 	display: inline;
@@ -39,11 +70,14 @@ body {
 	display:inline;
 }
 
-#disabled-radius-field {
+#radius-field:disabled {
+	background-color: #1a1d1a;
+	color: #1a1d1a;
 	display: block;
 }
 
-#disabled-radius-label {
+#radius-label {
+	color: #26413c
 	display: block;
 }
 
@@ -55,16 +89,29 @@ h3 {
 	text-align: center
 }
 h4 {
-	margin-top: 10px;
+	margin-top: 5px;
 	text-align: center
 }
 
+input:focus {
+	outline-style: dashed;
+	outline-color: #26413c;
+	outline-offset: 1px;
+}
 input {
+	padding: 0px 4px;
+	font-family: 'Aleo', serif;
+	border-style: solid;
+	border-width: 1px;
+	border-color: #26413c;
 	margin: 4px;
 	display: block;
+	color: #00d7d9;
+	background-color: #03120e;
 }
 
 label {
+	
 	font-size: 1em;
 	
 	padding: 0px 4px;
@@ -73,7 +120,7 @@ label {
 .svg-panel {
 	width: 500px;
 	float: left;
-	border: thin solid grey;
+	background-color: #03120e;
 
 }
 .svg-panel-820 {
@@ -83,10 +130,11 @@ label {
 
 }
 .control-panel {
-
+	border-radius: 4px;
+	padding: 1em;
+	background-color: #1a1d1a;
 	max-width: 350px;
 	min-width:300px;
 	float: left;
-	border: thin solid grey;
 
 }

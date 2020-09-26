@@ -8,7 +8,7 @@
 </head>
 <body>
 	<header>
-		<h1>Hard-pixel SVG: Masked Moiré</h1>
+		<h1>MoiréTest<img style="display: inline;" src="./svg/bullet.svg" /></h1>
 		<h3>by Kevin Higgins</h3>
 	</header>
 	<main class="main-block">
@@ -16,9 +16,12 @@
 			<div class="svg-panel"><svg xmlns="http://www.w3.org/2000/svg"></svg>
 			</div>
 			<div class="control-panel">
-				<h4>Edit selected shape</h4><label for="dash-array-field">Stroke dash array</label>
+				<!--<h4>Edit selected shape</h4>-->
+				<img src="./svg/top.svg" />
+				<label for="dash-array-field">Stroke dash array</label>
+
 				<input type="text" value="1,1" id="dash-array-field" /><label for="stroke-width-field">Stroke width</label><input type="number" placeholder="1" max="500" min="0" value="40" id="stroke-width-field" />
-				<label id="disabled-radius-label" for="disabled-radius-field">Radius</label><input id="disabled-radius-field" type="number" placeholder="1" max="500" min="0" value="40" />
+				<label id="radius-label" for="radius-field">Radius</label><input id="radius-field" type="number" placeholder="1" max="500" min="0" value="" />
 				<input class="moire-button" type="button" value="Move up" id="move-up-button" />
 				<input class="moire-button" type="button" value="Move down" id="move-down-button" />
 				<label for="masked-button">Masked</label>
@@ -32,7 +35,8 @@
 				<input class="moire-button-inline" type="color" value="#ffffff" id="col-button" />
 				<label for="fill-button">Fill</label>
 				<input class="moire-button-inline" type="checkbox" name="fill" value="filled" id="fill-button" />
-				<hr />
+				<br>
+				<img src="./svg/bot.svg" />
 
 				<input class="moire-button-inline" type="button" value="Next shape" id="next-button" />
 				<input class="moire-button-inline" type="button" value="Delete shape" id="delete-button" /><br />	
@@ -42,7 +46,7 @@
 				<select id="add-shape-menu" value=" "><option>Hatching</option><option>Rectangle</option><option>Circle</option><option>Quadratic curve</option></select>
 
 				<input class="moire-button" type="button" value="Switch shape-rendering" id="render-button" />
-				<input class="moire-button" type="button" value="Download" id="dl-button" />
+				<input class="moire-button-download" type="button" value="Download" id="dl-button" />
 				<a id="concealed-dl-link">Download SVG</a> <!--technique from boomcreeper11 on SO-->
 			</div>
 			

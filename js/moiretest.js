@@ -13,7 +13,7 @@ document.querySelector("#concealed-dl-link").addEventListener("click", function(
 document.querySelector("#dash-array-field").addEventListener("input", function() { changeDashArray(this.value) });
 document.querySelector("#stroke-width-field").addEventListener("change", function() { changeStrokeWidth(this.value) });
 
-document.querySelector("#disabled-radius-field").addEventListener("change", function() { changeRadius(this.value) });
+document.querySelector("#radius-field").addEventListener("change", function() { changeRadius(this.value) });
 document.querySelector("#col-button").addEventListener("change", function() { changeColour(this.value) });
 document.querySelector("#fill-button").addEventListener("change", function() { fill(this.checked) });
 document.querySelector("#add-shape-button").addEventListener("click", function() { addShape(document.querySelector("#add-shape-menu").value);});
@@ -26,7 +26,7 @@ var timeLastDragged= new Date();
 var shapes = [];
 var shapeMasking = []; // 2D array, 2 members in each subarray: boolean masked (false means part of mask) and a string, which for now is always = MASK_NAME; empty string, unmasked
 const MASK_NAME = "mask1";
-var filename = "svg/desert.svg";
+var filename = "svg/temple_of_industry.svg";
 const CLIPPING_WORKAROUND = " M 0 0 M 500 500";
 var loadedDefinitions;
 var selectedHandle = -1;
@@ -237,6 +237,8 @@ xhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
     	console.log("Going to setup with " + this);
     	setupSvg(this);
+    	console.log("Setting up controls first time");
+    	setControls();
     }
 };
 function move(amount) {
@@ -729,12 +731,15 @@ function resetHandles(el) { // pass which element you want to handles to control
 function setControls() {
 	console.log("Switching vals");
 	if (shapes[selectedShapeId].nodeName == "circle") {
-		document.getElementById("disabled-radius-field").disabled = false;
-		document.getElementById("disabled-radius-field").value = shapes[selectedShapeId].getAttributeNS(null, "r");
+		document.getElementById("radius-field").disabled = false;
+		document.getElementById("radius-label").style.color = "#00D7D9";
+		document.getElementById("radius-field").value = shapes[selectedShapeId].getAttributeNS(null, "r");
 		
 	}
 	else {
-		document.getElementById("disabled-radius-field").disabled = true;
+		document.getElementById("radius-field").disabled = true;
+		document.getElementById("radius-label").style.color = "#26413c";
+		document.getElementById("radius-field").setAttribute("value", "666");
 	}
 	document.getElementById("dash-array-field").value = shapes[selectedShapeId].getAttributeNS(null, "stroke-dasharray");
 	document.getElementById("stroke-width-field").value = shapes[selectedShapeId].getAttributeNS(null, "stroke-width");
