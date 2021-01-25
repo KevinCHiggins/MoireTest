@@ -117,6 +117,10 @@ label {
 	padding: 0px 4px;
 }
 
+.pointer {
+	text-align: center;
+}
+
 .svg-panel {
 	width: 500px;
 	float: left;
@@ -135,6 +139,14 @@ label {
 	background-color: #1a1d1a;
 	max-width: 350px;
 	min-width:300px;
+	height: 473px;
 	float: left;
 
+}
+.instructions {
+	clear: left;
+}
+
+li {
+	padding: 0.5em;
 }
